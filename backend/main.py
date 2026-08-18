@@ -177,7 +177,7 @@ def update_order_as_paid(order_id: str, payment_id: str | None = None):
 app = FastAPI(title="MSMEAssist AI API")
 
 try:
-    supabase.storage.create_bucket("invoices", {"public": True})
+    supabase.storage.create_bucket("invoices", {"name": "invoices", "public": True})
 except Exception:
     pass
 
@@ -1161,7 +1161,7 @@ def process_whatsapp_order_logic(customer_phone: str, customer_name: str, invoic
             print(f"Error uploading invoice to Supabase: {e}")
             if "Bucket not found" in str(e) or "404" in str(e):
                 try:
-                    supabase.storage.create_bucket("invoices", {"public": True})
+                    supabase.storage.create_bucket("invoices", {"name": "invoices", "public": True})
                     supabase.storage.from_("invoices").upload(
                         path=filename,
                         file=pdf_bytes,
@@ -1397,7 +1397,7 @@ TASK:
                 # Fallback if bucket creation failed earlier
                 if "Bucket not found" in str(e) or "404" in str(e):
                     try:
-                        supabase.storage.create_bucket("invoices", {"public": True})
+                        supabase.storage.create_bucket("invoices", {"name": "invoices", "public": True})
                         supabase.storage.from_("invoices").upload(
                             path=filename,
                             file=pdf_bytes,
