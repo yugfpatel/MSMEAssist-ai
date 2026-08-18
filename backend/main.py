@@ -1642,9 +1642,6 @@ async def razorpay_webhook(request: Request):
                     f"Amount paid: Rs. {total:.2f}"
                 ),
             )
-                "⚠️ Your invoice was generated, but its public HTTPS link is not available yet."
-            ),
-        )
 
     return {
         "success": True,
