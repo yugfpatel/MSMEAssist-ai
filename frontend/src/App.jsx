@@ -635,7 +635,7 @@ p { color: #a1a8b3; font-size: 16px; line-height: 1.6; margin: 6px 0 0; }
 .activity strong { font-size: 14px; color: #f0f2f5; }
 .activity span { font-size: 13px; color: #9299a5; margin-top: 3px; }
 .activity time { font-size: 13px; color: #7f8793; white-space: nowrap; }
-.table-panel { overflow: hidden; }
+.table-panel { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 table { width: 100%; border-collapse: collapse; }
 th { text-align: left; color: #8f96a2; font-size: 13px; font-weight: 700; padding: 10px 8px; border-bottom: 1px solid #292e36; }
 td { padding: 13px 8px; border-bottom: 1px solid #22262e; font-size: 14px; color: #d7dbe1; }
@@ -671,7 +671,21 @@ td { padding: 13px 8px; border-bottom: 1px solid #22262e; font-size: 14px; color
 .page-intro h2 { margin-bottom: 3px; }
 .empty { padding: 50px; text-align: center; color: #8f96a2; font-size: 16px; }
 @media (max-width: 1000px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .dashboard-grid { grid-template-columns: 1fr; } .product-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 700px) { .sidebar { width: 70px; padding: 20px 8px; } .brand div:last-child, .sidebar-label, .nav-item:not(.active) { font-size: 0; } .brand { justify-content: center; padding: 4px 0 25px; } .nav-item { justify-content: center; } .main-content { margin-left: 70px; width: calc(100% - 70px); padding: 0 16px 30px; } .stats-grid, .product-grid { grid-template-columns: 1fr; } .welcome-row { align-items: start; gap: 15px; flex-direction: column; } .product-form { grid-template-columns: 1fr; } }
+@media (max-width: 700px) {
+  .sidebar { width: 70px; padding: 20px 8px; }
+  .brand div:last-child, .sidebar-label, .ai-card div { display: none; }
+  .brand { justify-content: center; padding: 4px 0 25px; }
+  .nav-item { justify-content: center; font-size: 0; padding: 11px 0; }
+  .settings-btn { font-size: 0; padding: 10px 0; }
+  .settings-btn::before { content: '⚙'; font-size: 18px; }
+  .settings-btn[style*="color: #ff4d4f"]::before { content: '🚪'; }
+  .main-content { margin-left: 70px; width: calc(100% - 70px); padding: 0 16px 30px; }
+  .stats-grid, .product-grid { grid-template-columns: 1fr; }
+  .welcome-row { align-items: start; gap: 15px; flex-direction: column; }
+  .product-form { grid-template-columns: 1fr; }
+  .topbar { flex-direction: column; align-items: flex-start; justify-content: center; gap: 12px; height: auto; padding: 15px 0; }
+  .appointment-hero { flex-direction: column; text-align: center; }
+}
       `}</style>
     </div>
   );
