@@ -20,10 +20,11 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 INVOICE_DIR = os.path.join(BASE_DIR, "invoices")
 PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "").rstrip("/")
 
-FONT_PATH = "/System/Library/Fonts/Supplemental/Arial Unicode.ttf"
+FONT_PATH = os.path.join(BASE_DIR, "fonts", "DejaVuSans.ttf")
 
 if not os.path.exists(FONT_PATH):
-    FONT_PATH = "/System/Library/Fonts/Supplemental/DejaVu Sans.ttf"
+    # Fallback to system font if local font is missing for some reason
+    FONT_PATH = "/System/Library/Fonts/Supplemental/Arial Unicode.ttf"
 
 pdfmetrics.registerFont(TTFont("InvoiceUnicode", FONT_PATH))
 
