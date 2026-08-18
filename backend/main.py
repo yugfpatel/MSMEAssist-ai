@@ -176,9 +176,10 @@ def update_order_as_paid(order_id: str, payment_id: str | None = None):
 
 app = FastAPI(title="MSMEAssist AI API")
 
-INVOICE_DIR = Path(__file__).resolve().parent / "invoices"
-INVOICE_DIR.mkdir(parents=True, exist_ok=True)
-app.mount("/invoices", StaticFiles(directory=str(INVOICE_DIR)), name="invoices")
+try:
+    supabase.storage.create_bucket("invoices", {"public": True})
+except Exception:
+    pass
 
 PUBLIC_BASE_URL = os.getenv(
     "PUBLIC_BASE_URL",
@@ -186,36 +187,7 @@ PUBLIC_BASE_URL = os.getenv(
 ).rstrip("/")
 
 
-def get_public_invoice_url(invoice_result: dict) -> str | None:
-    existing_url = invoice_result.get("invoice_public_url") or invoice_result.get("public_url")
-    if isinstance(existing_url, str) and existing_url.startswith("https://") and "<filename>" not in existing_url:
-        return existing_url
 
-    candidates = []
-    for key in ("file_path", "pdf_path", "invoice_path", "filepath", "filename", "file_name", "invoice_file", "invoice_url", "file_url", "url"):
-        value = invoice_result.get(key)
-        if isinstance(value, str) and value.strip():
-            candidates.append(value.strip())
-
-    local_value = candidates[0] if candidates else None
-
-    if not local_value or "<filename>" in local_value:
-        pdf_files = list(INVOICE_DIR.glob("*.pdf"))
-        if pdf_files:
-            local_value = str(max(pdf_files, key=lambda p: p.stat().st_mtime))
-
-    if not local_value:
-        return None
-
-    filename = Path(local_value).name
-    if not filename.lower().endswith(".pdf"):
-        return None
-
-    if not (INVOICE_DIR / filename).exists():
-        return None
-
-    from urllib.parse import quote
-    return f"{PUBLIC_BASE_URL}/invoices/{quote(filename)}"
 
 app.add_middleware(
     CORSMiddleware,
@@ -1097,10 +1069,7 @@ def whatsapp_order(request: WhatsAppOrderRequest):
 pending_whatsapp_orders = {}
 
 # Payment links waiting for successful Razorpay payment before invoice delivery.
-pending_payment_orders = {}
 
-# Also index pending payment orders by customer phone for webhook reliability.
-pending_payment_by_phone = {}
 
 # Helper function to detect language
 def detect_language_from_message(msg: str) -> str:
@@ -1416,24 +1385,41 @@ TASK:
                 "message": "Invoice generation failed",
             }
 
+        invoice_url = None
+        pdf_bytes = invoice_result.get("pdf_bytes")
+        filename = invoice_result.get("filename")
+        if pdf_bytes and filename:
+            try:
+                supabase.storage.from_("invoices").upload(
+                    path=filename,
+                    file=pdf_bytes,
+                    file_options={"content-type": "application/pdf"}
+                )
+                invoice_url = supabase.storage.from_("invoices").get_public_url(filename)
+            except Exception as e:
+                print(f"Error uploading invoice to Supabase: {e}")
+                # Fallback if bucket creation failed earlier
+                if "Bucket not found" in str(e) or "404" in str(e):
+                    try:
+                        supabase.storage.create_bucket("invoices", {"public": True})
+                        supabase.storage.from_("invoices").upload(
+                            path=filename,
+                            file=pdf_bytes,
+                            file_options={"content-type": "application/pdf"}
+                        )
+                        invoice_url = supabase.storage.from_("invoices").get_public_url(filename)
+                    except Exception as inner_e:
+                        print(f"Second upload attempt failed: {inner_e}")
+
         payment_result = create_payment_link(
             amount=invoice_result["total"],
             customer_name=pending_order.get("customer_name", "WhatsApp Customer"),
             customer_phone=customer_phone,
             description="MSMEAssist AI WhatsApp Order",
+            invoice_url=invoice_url,
         )
 
         payment_link = payment_result.get("payment_link")
-        payment_link_id = payment_result.get("id") or payment_result.get("payment_link_id")
-
-        # Some payment services return a nested payment-link object.
-        if isinstance(payment_link, dict):
-            payment_link_id = payment_link.get("id") or payment_link_id
-            payment_link = (
-                payment_link.get("short_url")
-                or payment_link.get("url")
-                or payment_link.get("short_url")
-            )
 
         if not payment_link:
             send_whatsapp_message(
@@ -1443,31 +1429,8 @@ TASK:
             return {
                 "success": False,
                 "received": True,
-                "invoice": invoice_result,
-                "payment": payment_result,
+                "message": "Payment link creation failed",
             }
-
-        # Save everything needed for the post-payment invoice delivery.
-        invoice_url = get_public_invoice_url(invoice_result)
-
-        pending_payment_orders[payment_link_id or payment_link] = {
-            "customer_phone": customer_phone,
-            "customer_name": pending_order.get("customer_name", "WhatsApp Customer"),
-            "invoice": invoice_result,
-            "invoice_url": invoice_url,
-            "total": invoice_result["total"],
-        }
-
-        # Also index the pending order by customer phone because Razorpay
-        # test webhooks may not include payment_link_id consistently.
-        pending_payment_by_phone[customer_phone] = {
-            "payment_key": payment_link_id or payment_link,
-            "customer_phone": customer_phone,
-            "customer_name": pending_order.get("customer_name", "WhatsApp Customer"),
-            "invoice": invoice_result,
-            "invoice_url": invoice_url,
-            "total": invoice_result["total"],
-        }
 
         # IMPORTANT: payment link ONLY. Invoice is not sent here.
         zavu_response = send_whatsapp_message(
@@ -1634,89 +1597,30 @@ async def razorpay_webhook(request: Request):
     
     order_id_from_notes = payment_notes.get("order_id") or payment_link_notes.get("order_id")
     
-    if isinstance(payment_notes, dict):
-        payment_link_id = payment_link_id or payment_notes.get("payment_link_id")
-
     payment_id = payment_entity.get("id")
     if order_id_from_notes:
         update_result = update_order_as_paid(order_id_from_notes, payment_id)
         print(f"Order {order_id_from_notes} marked as paid directly from webhook notes: {update_result}")
 
-    pending_order = None
+    # Completely stateless extraction of metadata from Razorpay notes!
+    customer_phone = payment_notes.get("customer_phone") or payment_link_notes.get("customer_phone")
+    invoice_url = payment_notes.get("invoice_url") or payment_link_notes.get("invoice_url")
+    total = (payment_entity.get("amount") or payment_link_entity.get("amount") or 0) / 100.0
 
-    # First try the exact payment-link ID.
-    if payment_link_id:
-        pending_order = pending_payment_orders.pop(payment_link_id, None)
-
-    # payment_link.paid may contain the customer's contact even when the
-    # payment entity does not contain a payment_link_id.
-    if pending_order is None:
-        customer_phone_from_link = None
-        customer_from_link = payment_link_entity.get("customer")
-        if isinstance(customer_from_link, dict):
-            customer_phone_from_link = customer_from_link.get("contact")
-
-        if customer_phone_from_link:
-            normalized_contact = str(customer_phone_from_link).replace("+", "").replace(" ", "")
-            for phone_key, candidate in list(pending_payment_by_phone.items()):
-                normalized_pending = str(phone_key).replace("+", "").replace(" ", "")
-                if normalized_contact.endswith(normalized_pending) or normalized_pending.endswith(normalized_contact):
-                    pending_order = pending_payment_by_phone.pop(phone_key, None)
-                    if pending_order:
-                        pending_payment_orders.pop(pending_order.get("payment_key"), None)
-                    break
-
-    # If Razorpay did not provide a link ID, try matching the payment entity's
-    # contact number against the pending WhatsApp order.
-    customer_phone_from_payment = (
-        payment_notes.get("customer_phone")
-        or payment_entity.get("contact")
-        or payment_link_entity.get("customer", {}).get("contact")
-    )
-
-    if pending_order is None and customer_phone_from_payment:
-        normalized_contact = str(customer_phone_from_payment).replace("+", "").replace(" ", "")
-        for phone_key, candidate in list(pending_payment_by_phone.items()):
-            normalized_pending = str(phone_key).replace("+", "").replace(" ", "")
-            if normalized_contact.endswith(normalized_pending) or normalized_pending.endswith(normalized_contact):
-                pending_order = pending_payment_by_phone.pop(phone_key, None)
-                if pending_order:
-                    pending_payment_orders.pop(pending_order.get("payment_key"), None)
-                break
-
-    if pending_order is None:
-        print("NO PENDING ORDER MATCHED FOR PAYMENT IN MEMORY CACHE")
-        if order_id_from_notes:
-            return {
-                "success": True,
-                "received": True,
-                "payment_confirmed": True,
-                "invoice_sent": False,
-                "message": f"Payment recorded for order {order_id_from_notes}, but no pending order matched for invoice dispatch.",
-            }
+    if not customer_phone or not invoice_url:
+        print("NO CUSTOMER PHONE OR INVOICE URL FOUND IN PAYMENT NOTES.")
         return {
             "success": True,
             "received": True,
             "payment_confirmed": True,
             "invoice_sent": False,
-            "message": "Payment received but no pending order or order_id matched.",
+            "message": "Payment received but no invoice metadata found in notes.",
         }
 
-    customer_phone = pending_order["customer_phone"]
-    order_id = pending_order.get("order_id")
-    invoice_url = pending_order.get("invoice_url") or get_public_invoice_url(pending_order.get("invoice", {}))
-    total = pending_order["total"]
-
     print("PAYMENT CONFIRMED FOR:", customer_phone)
-    print("ORDER ID:", order_id)
+    print("ORDER ID:", order_id_from_notes)
     print("PUBLIC INVOICE URL:", invoice_url)
     print("TOTAL:", total)
-
-    # Mark the order as paid in the database if not already done via notes
-    if order_id and not order_id_from_notes:
-        payment_id = payment_entity.get("id")
-        update_result = update_order_as_paid(order_id, payment_id)
-        print(f"Order {order_id} marked as paid: {update_result}")
 
     # IMPORTANT: This is the first point where the invoice is sent.
     if invoice_url and invoice_url.startswith("https://") and "<filename>" not in invoice_url:
@@ -1738,12 +1642,6 @@ async def razorpay_webhook(request: Request):
                     f"Amount paid: Rs. {total:.2f}"
                 ),
             )
-    else:
-        zavu_response = send_whatsapp_message(
-            phone_number=customer_phone,
-            message=(
-                f"✅ Payment received!\n\n"
-                f"Amount paid: Rs. {total:.2f}\n"
                 "⚠️ Your invoice was generated, but its public HTTPS link is not available yet."
             ),
         )

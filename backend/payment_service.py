@@ -21,6 +21,7 @@ def create_payment_link(
     customer_phone: str | None = None,
     description: str = "MSMEAssist AI Payment",
     order_id: str | None = None,
+    invoice_url: str | None = None,
 ):
     amount_paise = int(round(amount * 100))
 
@@ -32,6 +33,8 @@ def create_payment_link(
         notes["order_id"] = order_id
     if customer_phone:
         notes["customer_phone"] = customer_phone
+    if invoice_url:
+        notes["invoice_url"] = invoice_url
 
     data = {
         "amount": amount_paise,

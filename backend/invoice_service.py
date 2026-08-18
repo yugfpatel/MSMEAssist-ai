@@ -38,6 +38,7 @@ def generate_invoice(
     gst_percent: float = 0,
     discount: float = 0,
 ):
+    import io
     invoice_number = f"INV-{datetime.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
     invoice_date = datetime.now().strftime("%d/%m/%Y")
 
@@ -51,10 +52,11 @@ def generate_invoice(
     total = max(0, total_before_discount - discount)
 
     filename = f"{invoice_number}.pdf"
-    filepath = os.path.join(INVOICE_DIR, filename)
+    
+    buffer = io.BytesIO()
 
     doc = SimpleDocTemplate(
-        filepath,
+        buffer,
         pagesize=A4,
         rightMargin=18 * mm,
         leftMargin=18 * mm,
@@ -169,17 +171,14 @@ def generate_invoice(
     )
 
     doc.build(story)
-
-    invoice_public_url = None
-    if PUBLIC_BASE_URL:
-        invoice_public_url = f"{PUBLIC_BASE_URL}/invoices/{filename}"
+    
+    pdf_bytes = buffer.getvalue()
+    buffer.close()
 
     return {
         "success": True,
         "invoice_number": invoice_number,
         "filename": filename,
-        "filepath": filepath,
-        "invoice_url": filepath,
-        "invoice_public_url": invoice_public_url,
+        "pdf_bytes": pdf_bytes,
         "total": round(total, 2),
     }
