@@ -1146,49 +1146,45 @@ def process_whatsapp_order_logic(customer_phone: str, customer_name: str, invoic
         send_whatsapp_message(customer_phone, "Sorry, bill generate karvama problem aavi. Please try again.")
         return {"success": True, "received": True, "message": "Invoice generation failed"}
 
+    invoice_url = None
+    pdf_bytes = invoice_result.get("pdf_bytes")
+    filename = invoice_result.get("filename")
+    if pdf_bytes and filename:
+        try:
+            supabase.storage.from_("invoices").upload(
+                path=filename,
+                file=pdf_bytes,
+                file_options={"content-type": "application/pdf"}
+            )
+            invoice_url = supabase.storage.from_("invoices").get_public_url(filename)
+        except Exception as e:
+            print(f"Error uploading invoice to Supabase: {e}")
+            if "Bucket not found" in str(e) or "404" in str(e):
+                try:
+                    supabase.storage.create_bucket("invoices", {"public": True})
+                    supabase.storage.from_("invoices").upload(
+                        path=filename,
+                        file=pdf_bytes,
+                        file_options={"content-type": "application/pdf"}
+                    )
+                    invoice_url = supabase.storage.from_("invoices").get_public_url(filename)
+                except Exception as inner_e:
+                    print(f"Second upload attempt failed: {inner_e}")
+
     payment_result = create_payment_link(
         amount=invoice_result["total"],
         customer_name=customer_name,
         customer_phone=customer_phone,
         description="MSMEAssist AI WhatsApp Order",
         order_id=order_id,
+        invoice_url=invoice_url,
     )
 
     payment_link = payment_result.get("payment_link")
-    payment_link_id = payment_result.get("id") or payment_result.get("payment_link_id")
-
-    if isinstance(payment_link, dict):
-        payment_link_id = payment_link.get("id") or payment_link_id
-        payment_link = payment_link.get("short_url") or payment_link.get("url") or payment_link.get("short_url")
 
     if not payment_link:
         send_whatsapp_message(customer_phone, f"Your order total is Rs. {invoice_result['total']:.2f}, but I couldn't create the payment link right now. Please try again.")
-        return {"success": True, "received": True, "invoice": invoice_result, "payment": payment_result}
-
-    invoice_url = get_public_invoice_url(invoice_result)
-
-    pending_payment_orders[payment_link_id or payment_link] = {
-        "order_id": order_id,
-        "customer_id": customer_id,
-        "customer_phone": customer_phone,
-        "customer_name": customer_name,
-        "invoice": invoice_result,
-        "invoice_url": invoice_url,
-        "total": invoice_result["total"],
-        "items": invoice_items,
-    }
-
-    pending_payment_by_phone[customer_phone] = {
-        "payment_key": payment_link_id or payment_link,
-        "order_id": order_id,
-        "customer_id": customer_id,
-        "customer_phone": customer_phone,
-        "customer_name": customer_name,
-        "invoice": invoice_result,
-        "invoice_url": invoice_url,
-        "total": invoice_result["total"],
-        "items": invoice_items,
-    }
+        return {"success": True, "received": True, "message": "Payment link creation failed"}
 
     pending_whatsapp_orders.pop(customer_phone, None)
 
