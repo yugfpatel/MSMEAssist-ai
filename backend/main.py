@@ -220,14 +220,18 @@ def get_public_invoice_url(invoice_result: dict) -> str | None:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
+        origin.strip().rstrip("/")
+        for origin in os.getenv(
+            "FRONTEND_URLS",
+            "http://localhost:5173,http://127.0.0.1:5173",
+        ).split(",")
+        if origin.strip()
     ],
     # Vite selects the next open port when 5173 is already occupied, and its
     # production preview uses a different local port. Permit local loopback
     # origins on those ports without opening credentialed CORS to arbitrary
     # websites.
-    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(?::\d+)?$",
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0.1)(?::\d+)?$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -969,14 +973,7 @@ IMPORTANT:
                 break
 
     if not response:
-        try:
-            print("Chat: Gemini 3.6 unavailable, using fallback gemini-3.5-flash")
-            response = gemini_client.models.generate_content(
-                model="gemini-3.5-flash",
-                contents=prompt
-            )
-        except Exception as e:
-            print(f"Chat: Fallback failed: {e}")
+        print("Chat: Gemini API could not generate response")
 
     if not response or not getattr(response, "text", None):
         return {
@@ -1348,14 +1345,7 @@ TASK:
                 break
 
     if not response:
-        try:
-            print("Gemini 3.6 unavailable, using fallback gemini-3.5-flash")
-            response = gemini_client.models.generate_content(
-                model="gemini-3.5-flash",
-                contents=prompt,
-            )
-        except Exception as e:
-            print(f"Fallback failed: {e}")
+        print("Gemini API could not generate response")
 
     if not response or not getattr(response, "text", None):
         error_msg = "Sorry, I'm having a little trouble processing your message right now. Please try again in a moment. 🙏"

@@ -287,7 +287,7 @@ function App() {
         <div className="brand">
           <div className="brand-mark">M</div>
           <div>
-            <strong>MSMEAssist</strong>
+            <strong>MSMEAssist AI</strong>
             <span>AI Business OS</span>
           </div>
         </div>
@@ -379,7 +379,6 @@ function App() {
                     <h3>Revenue overview</h3>
                     <span>Last 7 days</span>
                   </div>
-                  <button className="ghost-btn">This week ▾</button>
                 </div>
                 {Array.isArray(summary.revenue_last_7_days) && summary.revenue_last_7_days.length ? (
                   <div className="chart">
@@ -389,10 +388,15 @@ function App() {
                       // Normalize to percentage for bar height (relative to max)
                       const max = Math.max(...summary.revenue_last_7_days.map(e => typeof e === "object" && e !== null ? Number(e.value) || 0 : Number(e) || 0), 1);
                       const height = max ? Math.round((value / max) * 100) : 0;
+                      
+                      const d = new Date();
+                      d.setDate(d.getDate() - (6 - index));
+                      const dayName = d.toLocaleDateString("en-US", { weekday: "short" });
+                      
                       return (
                         <div className="chart-col" key={index}>
                           <div className="bar" style={{ height: `${height}%` }} />
-                          <span>{["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][index]}</span>
+                          <span>{dayName}</span>
                         </div>
                       );
                     })}
