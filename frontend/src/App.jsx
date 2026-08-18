@@ -330,7 +330,7 @@ function App() {
               <span className={`status-dot ${backendStatus === "Connected" ? "online" : ""}`} />
               {backendStatus}
             </div>
-            <div className="avatar">Y</div>
+
           </div>
         </header>
 
