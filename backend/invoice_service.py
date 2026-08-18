@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 INVOICE_DIR = os.path.join(BASE_DIR, "invoices")
 PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "").rstrip("/")
 
-FONT_PATH = os.path.join(BASE_DIR, "fonts", "DejaVuSans.ttf")
+FONT_PATH = os.path.join(BASE_DIR, "fonts", "NotoSans-Regular.ttf")
 
 if not os.path.exists(FONT_PATH):
     # Fallback to system font if local font is missing for some reason
