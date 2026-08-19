@@ -53,10 +53,11 @@ def send_whatsapp_document(
     payload = {
         "to": phone_number,
         "channel": "whatsapp",
-        "document": {
-            "url": document_url,
-            "filename": filename,
+        "messageType": "document",
+        "content": {
+            "mediaUrl": document_url,
             "caption": caption,
+            "filename": filename,
         },
     }
 
