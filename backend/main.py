@@ -346,29 +346,6 @@ def generate_invoice_endpoint(invoice: InvoiceRequest):
         )
         result["payment"] = payment
 
-    if result.get("success") and invoice.customer_phone:
-        payment_url = result.get("payment", {}).get("payment_link") if invoice.create_payment else None
-        try:
-            if payment_url and invoice_url:
-                from zavu_service import send_invoice_and_payment
-                zavu_res = send_invoice_and_payment(
-                    phone_number=invoice.customer_phone,
-                    invoice_url=invoice_url,
-                    payment_link=payment_url,
-                    total=result["total"]
-                )
-                result["zavu_response"] = zavu_res
-            elif payment_url:
-                from zavu_service import send_whatsapp_message
-                zavu_res = send_whatsapp_message(
-                    phone_number=invoice.customer_phone,
-                    message=f"Please complete your payment here:\n{payment_url}"
-                )
-                result["zavu_response"] = zavu_res
-        except Exception as e:
-            print(f"Error sending via Zavu: {e}")
-            result["zavu_error"] = str(e)
-
     return result
 
 
@@ -1240,24 +1217,14 @@ def process_whatsapp_order_logic(customer_phone: str, customer_name: str, invoic
 
     pending_whatsapp_orders.pop(customer_phone, None)
     
-    zavu_response = None
-    if invoice_url:
-        from zavu_service import send_invoice_and_payment
-        zavu_response = send_invoice_and_payment(
-            phone_number=customer_phone,
-            invoice_url=invoice_url,
-            payment_link=payment_link,
-            total=invoice_result['total']
-        )
-    else:
-        zavu_response = send_whatsapp_message(
-            phone_number=customer_phone,
-            message=(
-                f"💳 Your order total is Rs. {invoice_result['total']:.2f}.\n\n"
-                f"Please complete your payment here:\n{payment_link}\n\n"
-                "After successful payment, your invoice will be sent here automatically."
-            ),
-        )
+    zavu_response = send_whatsapp_message(
+        phone_number=customer_phone,
+        message=(
+            f"💳 Your order total is Rs. {invoice_result['total']:.2f}.\n\n"
+            f"Please complete your payment here:\n{payment_link}\n\n"
+            "After successful payment, your invoice will be sent here automatically."
+        ),
+    )
 
     return {
         "success": True,
@@ -1490,24 +1457,15 @@ TASK:
                 "message": "Payment link creation failed",
             }
 
-        zavu_response = None
-        if invoice_url:
-            from zavu_service import send_invoice_and_payment
-            zavu_response = send_invoice_and_payment(
-                phone_number=customer_phone,
-                invoice_url=invoice_url,
-                payment_link=payment_link,
-                total=invoice_result['total']
-            )
-        else:
-            zavu_response = send_whatsapp_message(
-                phone_number=customer_phone,
-                message=(
-                    f"💳 Your order total is Rs. {invoice_result['total']:.2f}.\n\n"
-                    f"Please complete your payment here:\n{payment_link}\n\n"
-                    "After successful payment, your invoice will be sent here automatically."
-                ),
-            )
+        # IMPORTANT: payment link ONLY. Invoice is not sent here.
+        zavu_response = send_whatsapp_message(
+            phone_number=customer_phone,
+            message=(
+                f"💳 Your order total is Rs. {invoice_result['total']:.2f}.\n\n"
+                f"Please complete your payment here:\n{payment_link}\n\n"
+                "After successful payment, your invoice will be sent here automatically."
+            ),
+        )
 
         return {
             "success": True,
