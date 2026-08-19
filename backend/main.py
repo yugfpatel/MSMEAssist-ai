@@ -1630,6 +1630,12 @@ async def razorpay_webhook(request: Request):
     
     payment_id = payment_entity.get("id")
     if order_id_from_notes:
+        # Check if the order was already paid to prevent duplicate webhooks from sending multiple invoices
+        existing_order = supabase.table("orders").select("payment_status").eq("id", order_id_from_notes).execute()
+        if existing_order.data and existing_order.data[0].get("payment_status") == "paid":
+            print(f"Order {order_id_from_notes} is already marked as paid. Ignoring duplicate webhook.")
+            return {"success": True, "received": True, "message": "Duplicate webhook ignored (already paid)"}
+
         update_result = update_order_as_paid(order_id_from_notes, payment_id)
         print(f"Order {order_id_from_notes} marked as paid directly from webhook notes: {update_result}")
 
