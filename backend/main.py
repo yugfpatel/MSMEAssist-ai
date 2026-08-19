@@ -1617,6 +1617,12 @@ async def razorpay_webhook(request: Request):
         or payment_entity.get("payment_link_id")
     )
 
+    # Prevent duplicate invoices: if this payment belongs to a payment link,
+    # we ONLY process the `payment_link.paid` event and ignore `payment.captured`.
+    if event == "payment.captured" and payment_link_id:
+        print(f"Ignoring payment.captured for payment link {payment_link_id} to prevent duplicate deliveries.")
+        return {"success": True, "received": True, "message": "Ignored payment.captured to prevent duplicates"}
+
     payment_notes = payment_entity.get("notes") or {}
     payment_link_notes = payment_link_entity.get("notes") or {}
     
