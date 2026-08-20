@@ -593,47 +593,24 @@ def get_dashboard_orders():
         
         business_id = business_response.data.get("id")
         
-        # Get all orders for this business
         orders_response = (
             supabase
             .table("orders")
-            .select("*")
+            .select("*, customers(*), order_items(*, products(name, price))")
             .eq("business_id", business_id)
             .order("created_at", desc=True)
             .execute()
         )
         
-        if not orders_response.data:
-            return {"orders": []}
-        
         orders_list = []
-        for order in orders_response.data:
-            order_id = order.get("id")
-            customer_id = order.get("customer_id")
-            
-            # Get customer details
-            customer_response = (
-                supabase
-                .table("customers")
-                .select("*")
-                .eq("id", customer_id)
-                .single()
-                .execute()
-            )
-            customer = customer_response.data or {}
-            
-            # Get order items
-            items_response = (
-                supabase
-                .table("order_items")
-                .select("*, products(name, price)")
-                .eq("order_id", order_id)
-                .execute()
-            )
-            
+        for order in orders_response.data or []:
+            customer = order.get("customers") or {}
+            if isinstance(customer, list):
+                customer = customer[0] if customer else {}
+                
             items_list = []
-            for item in items_response.data or []:
-                product = item.get("products", {})
+            for item in order.get("order_items") or []:
+                product = item.get("products") or {}
                 if isinstance(product, list):
                     product = product[0] if product else {}
                 items_list.append({
@@ -644,7 +621,7 @@ def get_dashboard_orders():
                 })
             
             orders_list.append({
-                "id": order_id,
+                "id": order.get("id"),
                 "customer_name": customer.get("name", "Unknown"),
                 "customer_phone": customer.get("phone", ""),
                 "items": items_list,
@@ -678,33 +655,20 @@ def get_dashboard_payments():
         
         business_id = business_response.data.get("id")
         
-        # Get all orders to show payments (both confirmed and pending)
         orders_response = (
             supabase
             .table("orders")
-            .select("*")
+            .select("*, customers(*)")
             .eq("business_id", business_id)
             .order("created_at", desc=True)
             .execute()
         )
         
-        if not orders_response.data:
-            return {"payments": []}
-        
         payments_list = []
-        for order in orders_response.data:
-            customer_id = order.get("customer_id")
-            
-            # Get customer details
-            customer_response = (
-                supabase
-                .table("customers")
-                .select("*")
-                .eq("id", customer_id)
-                .single()
-                .execute()
-            )
-            customer = customer_response.data or {}
+        for order in orders_response.data or []:
+            customer = order.get("customers") or {}
+            if isinstance(customer, list):
+                customer = customer[0] if customer else {}
             
             payments_list.append({
                 "id": order.get("id"),
