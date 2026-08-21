@@ -5,12 +5,11 @@ import VerifyBatch from "./VerifyBatch";
 
 const navItems = [
   { id: "overview", label: "Overview", icon: "⌂" },
+  { id: "honeychain", label: "Apiaries & Traceability", icon: "🐝" },
   { id: "orders", label: "Orders", icon: "🛒" },
   { id: "payments", label: "Payments", icon: "₹" },
   { id: "invoices", label: "Invoices", icon: "▤" },
-  { id: "products", label: "Products", icon: "📦" },
-  { id: "appointments", label: "Appointments", icon: "◷" },
-  { id: "honeychain", label: "Honey Chain", icon: "🐝" },
+  { id: "products", label: "Inventory", icon: "📦" },
 ];
 
 function App() {
@@ -566,16 +565,6 @@ function App() {
           </section>
         )}
 
-        {active === "appointments" && (
-          <section>
-            <div className="page-intro"><h2>Appointments</h2><p>Google Calendar bookings created by your AI assistant.</p></div>
-            <div className="appointment-hero panel">
-              <div className="calendar-icon">◷</div>
-              <div><h3>Calendar automation</h3><p>Connect Google Calendar and let MSMEAssist handle appointment requests from WhatsApp.</p></div>
-              <button className="primary-btn" onClick={() => window.open("http://localhost:8000/auth/google", "_blank")}>Connect Calendar</button>
-            </div>
-          </section>
-        )}
 
         {active === "honeychain" && (
           <section>
@@ -684,9 +673,6 @@ td { padding: 13px 8px; border-bottom: 1px solid #2a211e; font-size: 14px; color
 .product-footer strong { font-size: 21px; color: #fdfbf9; }
 .stock { font-size: 13px; color: #10b981; font-weight: 700; }
 .stock.low { color: #f59e0b; }
-.appointment-hero { display: flex; align-items: center; gap: 18px; }
-.appointment-hero > div:nth-child(2) { flex: 1; }
-.calendar-icon { width: 48px; height: 48px; border-radius: 12px; background: #231c19; display: grid; place-items: center; font-size: 26px; color: #fdfbf9; }
 .page-intro h2 { margin-bottom: 3px; }
 .empty { padding: 50px; text-align: center; color: #a39791; font-size: 16px; }
 @media (max-width: 1000px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .dashboard-grid { grid-template-columns: 1fr; } .product-grid { grid-template-columns: repeat(2, 1fr); } }
@@ -703,7 +689,6 @@ td { padding: 13px 8px; border-bottom: 1px solid #2a211e; font-size: 14px; color
   .welcome-row { align-items: start; gap: 15px; flex-direction: column; }
   .product-form { grid-template-columns: 1fr; }
   .topbar { flex-direction: column; align-items: flex-start; justify-content: center; gap: 12px; height: auto; padding: 15px 0; }
-  .appointment-hero { flex-direction: column; text-align: center; }
 }
       `}</style>
     </div>

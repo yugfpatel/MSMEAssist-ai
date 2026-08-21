@@ -212,74 +212,6 @@ app.add_middleware(
 # ---- Google Calendar Integration ----
 GOOGLE_REDIRECT_URI = "http://localhost:8000/auth/google/callback"
 
-
-@app.get("/auth/google")
-def google_auth():
-    authorization_url, _state = get_authorization_url(GOOGLE_REDIRECT_URI)
-    return RedirectResponse(authorization_url)
-
-
-@app.get("/auth/google/callback")
-def google_callback(request: Request):
-    authorization_response = str(request.url)
-    save_google_token(authorization_response, GOOGLE_REDIRECT_URI)
-    return {
-        "message": "Google Calendar connected successfully ✅",
-        "next": "Open /calendar/status to verify the connection.",
-    }
-
-
-class AppointmentRequest(BaseModel):
-    title: str
-    start_time: datetime
-    duration_minutes: int = 30
-    description: str = ""
-
-
-@app.get("/calendar/status")
-def calendar_status():
-    service = get_calendar_service()
-    if service is None:
-        return {
-            "connected": False,
-            "message": "Google Calendar is not connected. Open /auth/google first.",
-        }
-    return {
-        "connected": True,
-        "message": "Google Calendar is connected ✅",
-    }
-
-
-@app.get("/calendar/events")
-def calendar_events(max_results: int = 10):
-    try:
-        return {"success": True, "events": list_upcoming_events(max_results)}
-    except RuntimeError as exc:
-        return {"success": False, "message": str(exc)}
-
-
-@app.post("/calendar/events")
-def create_calendar_event(appointment: AppointmentRequest):
-    try:
-        end_time = (
-            appointment.start_time + timedelta(minutes=appointment.duration_minutes)
-        ).isoformat()
-        created_event = calendar_create_event(
-            summary=appointment.title,
-            start_time=appointment.start_time.isoformat(),
-            end_time=end_time,
-            description=appointment.description,
-        )
-        return {
-            "success": True,
-            "message": "Appointment booked successfully ✅",
-            "event_id": created_event.get("id"),
-            "event_link": created_event.get("htmlLink"),
-        }
-    except RuntimeError as exc:
-        return {"success": False, "message": str(exc)}
-
-
 # ---- Invoice Generator ----
 class InvoiceItem(BaseModel):
     name: str
@@ -840,7 +772,7 @@ def chat(request: ChatRequest):
         supabase
         .table("businesses")
         .select("*")
-        .eq("name", "Shree Restaurant")
+        .eq("name", "Gir Honey Apiaries")
         .single()
         .execute()
     )
@@ -857,7 +789,7 @@ def chat(request: ChatRequest):
     products = products_response.data
 
     prompt = f"""
-You are MSMEAssist AI, a friendly AI business assistant for small and medium businesses.
+You are HoneyChain AI, a friendly AI assistant for a beekeeping MSME.
 
 BUSINESS INFORMATION:
 {business}
@@ -882,29 +814,29 @@ If the customer writes Gujarati using English/Roman letters, reply ONLY in Gujli
 Do NOT use Gujarati script.
 
 Example:
-Customer: "Gujarati thali ketla ni che?"
-Reply: "Gujarati thali ₹180 ni che 😊"
+Customer: "Suddh madh ketla nu che?"
+Reply: "Pure gir honey ₹450 per kg che 😊"
 
-Customer: "Aaje restaurant open che?"
-Reply: "Ha, aaje restaurant open che."
+Customer: "Aaje apiary open che?"
+Reply: "Ha, aaje apiary open che."
 
 3. HINGLISH
 If the customer writes Hindi using English/Roman letters, reply ONLY in Hinglish.
 Do NOT use Devanagari script.
 
 Example:
-Customer: "Gujarati thali kitne ki hai?"
-Reply: "Gujarati thali ₹180 ki hai 😊"
+Customer: "Pure honey kitne ka hai?"
+Reply: "Pure gir honey ₹450 ka hai 😊"
 
-Customer: "Aaj restaurant kitne baje tak open hai?"
-Reply: "Aaj restaurant raat 11 baje tak open hai."
+Customer: "Aaj apiary kitne baje tak open hai?"
+Reply: "Aaj apiary raat 8 baje tak open hai."
 
 4. MIXED LANGUAGE
 If the customer mixes English with Hinglish or Gujlish, naturally mirror their style.
 
 Example:
-Customer: "Bhai Gujarati thali available che?"
-Reply: "Ha bhai, Gujarati thali available che 😊"
+Customer: "Bhai pure honey available che?"
+Reply: "Ha bhai, pure honey available che 😊"
 
 IMPORTANT:
 - Match the customer's language style.
@@ -1034,7 +966,7 @@ def whatsapp_order(request: WhatsAppOrderRequest):
         })
 
     invoice_result = generate_invoice(
-        business_name="Shree Restaurant",
+        business_name="Gir Honey Apiaries",
         customer_name=request.customer_name,
         items=invoice_items,
         gst_percent=0,
@@ -1129,7 +1061,7 @@ def process_whatsapp_order_logic(customer_phone: str, customer_name: str, invoic
         return {"success": True, "received": True, "message": "Order creation failed"}
     
     invoice_result = generate_invoice(
-        business_name="Shree Restaurant",
+        business_name="Gir Honey Apiaries",
         customer_name=customer_name,
         items=invoice_items,
         gst_percent=0,
@@ -1223,7 +1155,7 @@ async def zavu_webhook(request: Request):
         supabase
         .table("businesses")
         .select("*")
-        .eq("name", "Shree Restaurant")
+        .eq("name", "Gir Honey Apiaries")
         .single()
         .execute()
     )
@@ -1246,7 +1178,7 @@ async def zavu_webhook(request: Request):
         batches = []
 
     prompt = f"""
-You are MSMEAssist AI, a friendly AI business assistant for small and medium businesses.
+You are HoneyChain AI, a friendly AI assistant for a beekeeping MSME.
 
 BUSINESS INFORMATION:
 {business}
@@ -1262,7 +1194,7 @@ CUSTOMER MESSAGE:
 {customer_message}
 
 TASK:
-1. Decide whether the customer is asking a normal question, requesting an order/purchase, or asking about an appointment.
+1. Decide whether the customer is asking a normal question or requesting an order/purchase.
 2. If it is an order/purchase, return ONLY valid JSON in this exact structure:
 {{
   "intent": "order",
@@ -1276,12 +1208,6 @@ TASK:
   "intent": "chat",
   "items": [],
   "reply": "short customer-facing answer"
-}}
-4. If it is an appointment request, return ONLY valid JSON in this exact structure:
-{{
-  "intent": "appointment",
-  "items": [],
-  "reply": "short customer-facing request for date/time"
 }}
 5. Never invent products, prices, stock, timings or business information.
 6. Use ONLY products listed in PRODUCTS.
@@ -1368,7 +1294,7 @@ TASK:
         # Create the invoice internally so we know the final payable amount,
         # but DO NOT send the invoice to the customer yet.
         invoice_result = generate_invoice(
-            business_name="Shree Restaurant",
+            business_name="Gir Honey Apiaries",
             customer_name=pending_order.get("customer_name", "WhatsApp Customer"),
             items=invoice_items,
             gst_percent=0,
@@ -1468,27 +1394,6 @@ TASK:
             "success": True,
             "received": True,
             "intent": "order_cancelled",
-            "zavu_response": zavu_response,
-        }
-
-    if intent == "appointment":
-        detected_lang = detect_language_from_message(customer_message)
-        if detected_lang == "gujlish":
-            appt_msg = ai_reply or "Sure! Aapda kone date ane time ane possible che?"
-        elif detected_lang == "hinglish":
-            appt_msg = ai_reply or "Sure! Aap kab appointment lena chahte ho?"
-        else:
-            appt_msg = ai_reply or "Sure! Please tell me your preferred date and time for the appointment."
-        
-        zavu_response = send_whatsapp_message(
-            phone_number=customer_phone,
-            message=appt_msg,
-        )
-        return {
-            "success": True,
-            "received": True,
-            "intent": "appointment",
-            "reply": appt_msg,
             "zavu_response": zavu_response,
         }
 
