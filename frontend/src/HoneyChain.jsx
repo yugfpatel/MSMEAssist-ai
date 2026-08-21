@@ -55,10 +55,10 @@ export default function HoneyChain({ activeSection = "overview" }) {
   }
 
   async function handleAIGenerateBatch() {
-    if (!aiPrompt) return;
+    const promptToUse = aiPrompt || "Generate a realistic 20kg batch of Premium Wildflower Honey harvested today.";
     setIsGeneratingBatch(true);
     try {
-      const res = await API.post("/api/honey/ai-generate-batch", { prompt: aiPrompt });
+      const res = await API.post("/api/honey/ai-generate-batch", { prompt: promptToUse });
       if (res.data.success && res.data.batch) {
         setBatchForm(prev => ({ ...prev, ...res.data.batch }));
       }

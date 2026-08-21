@@ -191,8 +191,10 @@ User Notes: {user_prompt}
                 contents=sys_prompt,
             )
             raw = response.text.strip()
-            if raw.startswith("```json"):
-                raw = raw.replace("```json", "").replace("```", "").strip()
+            import re
+            match = re.search(r'\{.*\}', raw, re.DOTALL)
+            if match:
+                raw = match.group(0)
             return {"success": True, "batch": json.loads(raw)}
         except Exception as e:
             print("AI Generate error:", e)
