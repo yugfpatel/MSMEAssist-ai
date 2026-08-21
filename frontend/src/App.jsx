@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import API from "./api";
+import HoneyChain from "./HoneyChain";
+import VerifyBatch from "./VerifyBatch";
 
 const navItems = [
   { id: "overview", label: "Overview", icon: "⌂" },
@@ -8,6 +10,7 @@ const navItems = [
   { id: "invoices", label: "Invoices", icon: "▤" },
   { id: "products", label: "Products", icon: "📦" },
   { id: "appointments", label: "Appointments", icon: "◷" },
+  { id: "honeychain", label: "Honey Chain", icon: "🐝" },
 ];
 
 function App() {
@@ -246,6 +249,11 @@ function App() {
   const totalProducts = products.length;
 
   const title = navItems.find((item) => item.id === active)?.label || "Overview";
+
+  const verifyMatch = window.location.pathname.match(/^\/verify\/batch\/([A-Za-z0-9-]+)/);
+  if (verifyMatch) {
+    return <VerifyBatch batchId={verifyMatch[1]} />;
+  }
 
   if (!isLoggedIn) {
     return (
@@ -567,6 +575,16 @@ function App() {
             </div>
           </section>
         )}
+
+        {active === "honeychain" && (
+          <section>
+            <div className="page-intro">
+              <h2>Honey Chain (SIH26021)</h2>
+              <p>Blockchain-based traceability and smart beekeeping management.</p>
+            </div>
+            <HoneyChain />
+          </section>
+        )}
       </main>
 
       <style>{`
@@ -788,8 +806,15 @@ function OrdersTable({ orders, full = false }) {
                     <ul style={{ listStyleType: "none", padding: 0, margin: 0 }}>
                       {order.items && order.items.length > 0 ? (
                         order.items.map((it, idx) => (
-                          <li key={idx} style={{ padding: "6px 0", borderBottom: idx < order.items.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none", display: "flex", justifyContent: "space-between", fontSize: "18px" }}>
-                             <span><span style={{ color: "#aaa", marginRight: "8px" }}>{it.quantity}x</span> {it.product}</span>
+                          <li key={idx} style={{ padding: "6px 0", borderBottom: idx < order.items.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "18px" }}>
+                             <span>
+                               <span style={{ color: "#aaa", marginRight: "8px" }}>{it.quantity}x</span> {it.product}
+                               {it.batch_id && (
+                                 <a href={`/verify/batch/${it.batch_id}`} target="_blank" rel="noreferrer" style={{ marginLeft: "12px", fontSize: "13px", color: "#d97706", textDecoration: "none", background: "rgba(217, 119, 6, 0.1)", padding: "2px 8px", borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                                   🐝 Verify Batch
+                                 </a>
+                               )}
+                             </span>
                              <span style={{ color: "#aaa" }}>{formatCurrency(it.total)}</span>
                           </li>
                         ))

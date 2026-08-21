@@ -596,7 +596,7 @@ def get_dashboard_orders():
         orders_response = (
             supabase
             .table("orders")
-            .select("*, customers(*), order_items(*, products(name, price))")
+            .select("*, customers(*), order_items(*, products(name, price, batch_id))")
             .eq("business_id", business_id)
             .order("created_at", desc=True)
             .execute()
@@ -615,6 +615,7 @@ def get_dashboard_orders():
                     product = product[0] if product else {}
                 items_list.append({
                     "product": product.get("name", "Unknown"),
+                    "batch_id": product.get("batch_id") or item.get("batch_id"),
                     "quantity": item.get("quantity"),
                     "price": item.get("price"),
                     "total": float(item.get("quantity", 0)) * float(item.get("price", 0))
@@ -1237,6 +1238,13 @@ async def zavu_webhook(request: Request):
     business = business_response.data
     products = products_response.data or []
 
+    # Honey Chain Traceability Data
+    try:
+        batches_response = supabase.table("honey_batches").select("batch_id, product_name, honey_variety, harvest_date, quality_info").execute()
+        batches = batches_response.data or []
+    except Exception:
+        batches = []
+
     prompt = f"""
 You are MSMEAssist AI, a friendly AI business assistant for small and medium businesses.
 
@@ -1245,6 +1253,10 @@ BUSINESS INFORMATION:
 
 PRODUCTS:
 {products}
+
+HONEY BATCHES & TRACEABILITY (Honey Chain Module):
+{batches}
+If a customer asks about the origin, authenticity, or details of a honey product (e.g., "Is this honey genuine?", "Where is it from?"), use the HONEY BATCHES information to inform them. Tell them they can verify authenticity using the Batch ID or the QR code provided on the product. NEVER invent honey varieties, prices, batch information, or harvest dates.
 
 CUSTOMER MESSAGE:
 {customer_message}
@@ -1652,3 +1664,7 @@ async def razorpay_webhook(request: Request):
         "invoice_sent": True if zavu_response else False,
         "zavu_response": zavu_response,
     }
+
+# --- Honey Chain Integration ---
+from honey_chain import attach_honey_chain_routes
+attach_honey_chain_routes(app, supabase, gemini_client, BUSINESS_NAME)
