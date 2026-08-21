@@ -116,7 +116,7 @@ function App() {
 
   function handleLogin(e) {
     e.preventDefault();
-    if (loginEmail === import.meta.env.VITE_DASHBOARD_EMAIL && loginPassword === import.meta.env.VITE_DASHBOARD_PASSWORD) {
+    if (loginEmail === "admin@apis.ai" && loginPassword === "apisai") {
       localStorage.setItem("msmeassist_logged_in", "true");
       setIsLoggedIn(true);
       setLoginError("");
