@@ -1,3 +1,5 @@
+import QRCode from "react-qr-code";
+
 import React, { useEffect, useState } from "react";
 import API from "./api";
 
@@ -196,6 +198,10 @@ export default function HoneyChain({ activeSection = "overview" }) {
                   <div><strong>Variety:</strong> {b.honey_variety}</div>
                   <div><strong>Packaged:</strong> {b.packaging_date}</div>
                   <div><strong>Quality:</strong> {b.quality_info}</div>
+                </div>
+                
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: "16px", padding: "10px", background: "#fff", borderRadius: "8px", width: "fit-content", margin: "0 auto 16px auto" }}>
+                  <QRCode value={`${window.location.origin}/verify/batch/${b.batch_id}`} size={120} />
                 </div>
                 
                 <a href={`/verify/batch/${b.batch_id}`} target="_blank" rel="noreferrer" style={{ display: "block", textAlign: "center", padding: "10px", background: "rgba(245, 158, 11, 0.1)", color: "#f59e0b", textDecoration: "none", borderRadius: "8px", fontWeight: "bold", border: "1px solid rgba(245, 158, 11, 0.2)", transition: "all 0.2s" }} onMouseOver={e => e.currentTarget.style.background="rgba(245, 158, 11, 0.2)"} onMouseOut={e => e.currentTarget.style.background="rgba(245, 158, 11, 0.1)"}>

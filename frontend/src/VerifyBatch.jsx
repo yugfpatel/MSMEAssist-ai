@@ -1,3 +1,5 @@
+import QRCode from "react-qr-code";
+
 import React, { useEffect, useState } from "react";
 import API from "./api";
 import "./App.css"; // Reuse existing styles if possible
@@ -34,8 +36,12 @@ export default function VerifyBatch({ batchId }) {
         <div style={{ fontSize: "40px", marginBottom: "10px" }}>🐝</div>
         <h1 style={{ color: "#f59e0b", margin: "0 0 5px 0" }}>ApisAI</h1>
         <p style={{ color: "#a39791", margin: "0 0 20px 0", fontSize: "14px" }}>AI-Powered Smart Beekeeping & Honey Traceability</p>
-        <div style={{ background: blockchain?.verified ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)", color: blockchain?.verified ? "#10b981" : "#ef4444", border: `1px solid ${blockchain?.verified ? "rgba(16, 185, 129, 0.2)" : "rgba(239, 68, 68, 0.2)"}`, padding: "10px 20px", borderRadius: "8px", fontWeight: "bold", display: "inline-block" }}>
+        <div style={{ background: blockchain?.verified ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)", color: blockchain?.verified ? "#10b981" : "#ef4444", border: `1px solid ${blockchain?.verified ? "rgba(16, 185, 129, 0.2)" : "rgba(239, 68, 68, 0.2)"}`, padding: "10px 20px", borderRadius: "8px", fontWeight: "bold", display: "inline-block", marginBottom: "20px" }}>
           {blockchain?.verified ? "✓ Blockchain Traceability Verified" : "⚠️ Traceability Verification Failed"}
+        </div>
+        
+        <div style={{ display: "flex", justifyContent: "center", padding: "10px", background: "#fff", borderRadius: "8px", width: "fit-content", margin: "0 auto" }}>
+          <QRCode value={window.location.href} size={100} />
         </div>
       </div>
 
