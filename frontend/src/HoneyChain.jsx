@@ -8,6 +8,7 @@ export default function HoneyChain({ activeSection = "overview" }) {
   const [insights, setInsights] = useState({});
   const [sensorData, setSensorData] = useState({});
   const [loading, setLoading] = useState(false);
+  const [analyzing, setAnalyzing] = useState({});
 
   async function loadData() {
     setLoading(true);
@@ -31,6 +32,7 @@ export default function HoneyChain({ activeSection = "overview" }) {
   }, []);
 
   async function loadInsights(hiveId) {
+    setAnalyzing(prev => ({ ...prev, [hiveId]: true }));
     try {
       const [insRes, sensRes] = await Promise.all([
         API.get(`/api/honey/insights/${hiveId}`),
@@ -41,6 +43,7 @@ export default function HoneyChain({ activeSection = "overview" }) {
     } catch (e) {
       console.error(e);
     }
+    setAnalyzing(prev => ({ ...prev, [hiveId]: false }));
   }
 
   async function demoIoT(hiveId) {
@@ -122,7 +125,9 @@ export default function HoneyChain({ activeSection = "overview" }) {
                 
                 <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
                   <button className="ghost-btn" onClick={() => demoIoT(hive.id)} style={{ flex: 1, fontSize: "12px" }}>📶 Ping IoT</button>
-                  <button className="ghost-btn" onClick={() => loadInsights(hive.id)} style={{ flex: 1, fontSize: "12px", color: "#a855f7", borderColor: "rgba(168,85,247,0.3)" }}>✨ AI Analyze</button>
+                  <button className="ghost-btn" onClick={() => loadInsights(hive.id)} disabled={analyzing[hive.id]} style={{ flex: 1, fontSize: "12px", color: "#a855f7", borderColor: "rgba(168,85,247,0.3)" }}>
+                    {analyzing[hive.id] ? "⏳ Analyzing..." : "✨ AI Analyze"}
+                  </button>
                 </div>
                 
                 {sensorData[hive.id] && sensorData[hive.id].length > 0 && (
