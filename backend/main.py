@@ -174,7 +174,7 @@ def update_order_as_paid(order_id: str, payment_id: str | None = None):
         return None
 
 
-app = FastAPI(title="MSMEAssist AI API")
+app = FastAPI(title="ApisAI API")
 
 try:
     supabase.storage.create_bucket("invoices", {"name": "invoices", "public": True})
@@ -227,7 +227,7 @@ class InvoiceRequest(BaseModel):
     discount: float = 0
     customer_phone: str | None = None
     create_payment: bool = True
-    payment_description: str = "MSMEAssist AI Invoice Payment"
+    payment_description: str = "ApisAI Invoice Payment"
 
 
 @app.post("/invoice/generate")
@@ -284,7 +284,7 @@ def generate_invoice_endpoint(invoice: InvoiceRequest):
 @app.get("/")
 def home():
     return {
-        "message": "MSMEAssist AI API is running 🚀"
+        "message": "ApisAI API is running 🚀"
     }
 
 
@@ -886,7 +886,7 @@ class PaymentRequest(BaseModel):
     amount: float
     customer_name: str
     customer_phone: str | None = None
-    description: str = "MSMEAssist AI Payment"
+    description: str = "ApisAI Payment"
 
 
 @app.post("/payment/create")
@@ -901,7 +901,7 @@ def create_payment(request: PaymentRequest):
 # ---- WhatsApp / Zavu Test ----
 class WhatsAppTestRequest(BaseModel):
     phone_number: str
-    message: str = "MSMEAssist AI is connected!"
+    message: str = "ApisAI is connected!"
 
 
 # ---- WhatsApp Order Models ----
@@ -980,7 +980,7 @@ def whatsapp_order(request: WhatsAppOrderRequest):
         amount=invoice_result["total"],
         customer_name=request.customer_name,
         customer_phone=request.phone_number,
-        description="MSMEAssist AI WhatsApp Order",
+        description="ApisAI WhatsApp Order",
     )
 
     return {
@@ -1101,7 +1101,7 @@ def process_whatsapp_order_logic(customer_phone: str, customer_name: str, invoic
         amount=invoice_result["total"],
         customer_name=customer_name,
         customer_phone=customer_phone,
-        description="MSMEAssist AI WhatsApp Order",
+        description="ApisAI WhatsApp Order",
         order_id=order_id,
         invoice_url=invoice_url,
     )
@@ -1342,7 +1342,7 @@ TASK:
             amount=invoice_result["total"],
             customer_name=pending_order.get("customer_name", "WhatsApp Customer"),
             customer_phone=customer_phone,
-            description="MSMEAssist AI WhatsApp Order",
+            description="ApisAI WhatsApp Order",
             invoice_url=invoice_url,
         )
 

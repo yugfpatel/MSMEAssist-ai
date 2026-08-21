@@ -19,7 +19,7 @@ def create_payment_link(
     amount: float,
     customer_name: str,
     customer_phone: str | None = None,
-    description: str = "MSMEAssist AI Payment",
+    description: str = "ApisAI Payment",
     order_id: str | None = None,
     invoice_url: str | None = None,
 ):

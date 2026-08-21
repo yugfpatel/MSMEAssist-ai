@@ -267,7 +267,7 @@ function App() {
           <label style={{ display: 'block', marginBottom: '8px', color: '#ccc', fontSize: '18px' }}>Email</label>
           <input 
             type="email" 
-            placeholder="admin@msmeassist.ai" 
+            placeholder="admin@apis.ai" 
             value={loginEmail} 
             onChange={e => setLoginEmail(e.target.value)}
             style={{ width: '100%', marginBottom: '16px', padding: '12px', background: '#0a0a0a', border: '1px solid #333', borderRadius: '8px', color: '#fff', boxSizing: 'border-box' }}
@@ -452,7 +452,7 @@ function App() {
 
         {active === "payments" && (
           <section>
-            <div className="page-intro"><h2>Payments</h2><p>Monitor payments collected through MSMEAssist.</p></div>
+            <div className="page-intro"><h2>Payments</h2><p>Monitor payments collected through ApisAI.</p></div>
             <div className="stats-grid">
               <StatCard
                 label="Collected"
