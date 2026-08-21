@@ -32,7 +32,7 @@ export default function VerifyBatch({ batchId }) {
     <div className="verify-container" style={{ padding: "30px 20px", maxWidth: "600px", margin: "0 auto", fontFamily: "sans-serif", background: "#171311", minHeight: "100vh", color: "#fdfbf9" }}>
       <div style={{ textAlign: "center", marginBottom: "30px" }}>
         <div style={{ fontSize: "40px", marginBottom: "10px" }}>🐝</div>
-        <h1 style={{ color: "#f59e0b", margin: "0 0 5px 0" }}>Honey Chain</h1>
+        <h1 style={{ color: "#f59e0b", margin: "0 0 5px 0" }}>ApisAI</h1>
         <p style={{ color: "#a39791", margin: "0 0 20px 0", fontSize: "14px" }}>AI-Powered Smart Beekeeping & Honey Traceability</p>
         <div style={{ background: blockchain?.verified ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)", color: blockchain?.verified ? "#10b981" : "#ef4444", border: `1px solid ${blockchain?.verified ? "rgba(16, 185, 129, 0.2)" : "rgba(239, 68, 68, 0.2)"}`, padding: "10px 20px", borderRadius: "8px", fontWeight: "bold", display: "inline-block" }}>
           {blockchain?.verified ? "✓ Blockchain Traceability Verified" : "⚠️ Traceability Verification Failed"}

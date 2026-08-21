@@ -789,7 +789,7 @@ def chat(request: ChatRequest):
     products = products_response.data
 
     prompt = f"""
-You are HoneyChain AI, a friendly AI assistant for a beekeeping MSME.
+You are ApisAI, a friendly AI assistant for a beekeeping MSME.
 
 BUSINESS INFORMATION:
 {business}
@@ -1170,7 +1170,7 @@ async def zavu_webhook(request: Request):
     business = business_response.data
     products = products_response.data or []
 
-    # Honey Chain Traceability Data
+    # ApisAI Traceability Data
     try:
         batches_response = supabase.table("honey_batches").select("batch_id, product_name, honey_variety, harvest_date, quality_info").execute()
         batches = batches_response.data or []
@@ -1178,7 +1178,7 @@ async def zavu_webhook(request: Request):
         batches = []
 
     prompt = f"""
-You are HoneyChain AI, a friendly AI assistant for a beekeeping MSME.
+You are ApisAI, a friendly AI assistant for a beekeeping MSME.
 
 BUSINESS INFORMATION:
 {business}
@@ -1186,7 +1186,7 @@ BUSINESS INFORMATION:
 PRODUCTS:
 {products}
 
-HONEY BATCHES & TRACEABILITY (Honey Chain Module):
+HONEY BATCHES & TRACEABILITY (ApisAI Module):
 {batches}
 If a customer asks about the origin, authenticity, or details of a honey product (e.g., "Is this honey genuine?", "Where is it from?"), use the HONEY BATCHES information to inform them. Tell them they can verify authenticity using the Batch ID or the QR code provided on the product. NEVER invent honey varieties, prices, batch information, or harvest dates.
 
@@ -1570,6 +1570,6 @@ async def razorpay_webhook(request: Request):
         "zavu_response": zavu_response,
     }
 
-# --- Honey Chain Integration ---
+# --- ApisAI Integration ---
 from honey_chain import attach_honey_chain_routes
 attach_honey_chain_routes(app, supabase, gemini_client, BUSINESS_NAME)

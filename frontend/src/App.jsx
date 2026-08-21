@@ -261,7 +261,7 @@ function App() {
       <div className="login-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#0a0a0a', fontFamily: 'sans-serif' }}>
         <form onSubmit={handleLogin} className="login-form panel" style={{ margin: 'auto', width: '100%', maxWidth: '400px', padding: '32px', background: '#141414', border: '1px solid #222', borderRadius: '12px' }}>
           <div style={{ textAlign: "center", fontSize: "40px", marginBottom: "10px" }}>🐝</div>
-          <h2 style={{ textAlign: 'center', marginBottom: '8px', color: '#f59e0b', fontSize: '28px' }}>Honey Chain</h2>
+          <h2 style={{ textAlign: 'center', marginBottom: '8px', color: '#f59e0b', fontSize: '28px' }}>ApisAI</h2>
           <p style={{ textAlign: 'center', color: '#888', marginBottom: '24px', fontSize: '15px' }}>AI-Powered Smart Beekeeping & Honey Traceability</p>
           
           <label style={{ display: 'block', marginBottom: '8px', color: '#ccc', fontSize: '18px' }}>Email</label>
@@ -297,7 +297,7 @@ function App() {
         <div className="brand">
           <div className="brand-mark" style={{ background: "rgba(245, 158, 11, 0.1)", border: "1px solid rgba(245, 158, 11, 0.2)" }}>🐝</div>
           <div>
-            <strong style={{ color: "#f59e0b" }}>Honey Chain</strong>
+            <strong style={{ color: "#f59e0b" }}>ApisAI</strong>
             <span>Smart Apiary Platform</span>
           </div>
         </div>
@@ -571,7 +571,7 @@ function App() {
         {["hives", "harvests", "batches"].includes(active) && (
           <section>
             <div className="page-intro">
-              <h2>Honey Chain Subsystem</h2>
+              <h2>ApisAI Subsystem</h2>
               <p>Blockchain-based traceability and smart beekeeping management.</p>
             </div>
             <HoneyChain activeSection={active} />
