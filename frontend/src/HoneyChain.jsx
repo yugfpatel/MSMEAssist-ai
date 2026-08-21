@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import API from "./api";
 
-export default function HoneyChain() {
-  const [activeTab, setActiveTab] = useState("overview");
+export default function HoneyChain({ activeSection = "overview" }) {
   const [hives, setHives] = useState([]);
   const [harvests, setHarvests] = useState([]);
   const [batches, setBatches] = useState([]);
@@ -57,22 +56,9 @@ export default function HoneyChain() {
 
   return (
     <div className="honey-chain-module">
-      <div className="tabs" style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
-        {["overview", "hives", "harvests", "batches"].map(tab => (
-          <button 
-            key={tab} 
-            onClick={() => setActiveTab(tab)}
-            className={activeTab === tab ? "primary-btn" : "ghost-btn"}
-            style={{ textTransform: "capitalize", padding: "8px 18px", fontSize: "14px", borderRadius: "20px" }}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
       {loading && <p style={{ color: "#8f96a2" }}>Loading apiary data...</p>}
 
-      {!loading && activeTab === "overview" && (
+      {!loading && activeSection === "overview" && (
         <div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
             <h2 style={{ fontSize: "20px", color: "#f59e0b" }}>Apiary Overview</h2>
@@ -118,7 +104,7 @@ export default function HoneyChain() {
         </div>
       )}
 
-      {!loading && activeTab === "hives" && (
+      {!loading && activeSection === "hives" && (
         <div>
           <h2 style={{ fontSize: "20px", color: "#f59e0b", marginBottom: "16px" }}>Hive Management</h2>
           <div className="product-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
@@ -159,7 +145,7 @@ export default function HoneyChain() {
         </div>
       )}
 
-      {!loading && activeTab === "harvests" && (
+      {!loading && activeSection === "harvests" && (
         <div className="panel table-panel">
           <h2 style={{ fontSize: "20px", color: "#f59e0b", marginBottom: "16px" }}>Harvest Records</h2>
           <table>
@@ -187,7 +173,7 @@ export default function HoneyChain() {
         </div>
       )}
 
-      {!loading && activeTab === "batches" && (
+      {!loading && activeSection === "batches" && (
         <div>
           <h2 style={{ fontSize: "20px", color: "#f59e0b", marginBottom: "16px" }}>Traceability Batches</h2>
           <div className="product-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))" }}>

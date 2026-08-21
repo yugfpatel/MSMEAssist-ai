@@ -29,34 +29,41 @@ export default function VerifyBatch({ batchId }) {
   if (!batch) return <div className="app-container"><div className="error-message">Batch {batchId} not found or invalid.</div></div>;
 
   return (
-    <div className="verify-container" style={{ padding: "20px", maxWidth: "600px", margin: "0 auto", fontFamily: "sans-serif" }}>
-      <div style={{ textAlign: "center", marginBottom: "20px" }}>
-        <h1 style={{ color: "#d97706" }}>Honey Traceability</h1>
-        <div style={{ background: blockchain?.verified ? "#dcfce7" : "#fee2e2", color: blockchain?.verified ? "#166534" : "#991b1b", padding: "10px", borderRadius: "8px", fontWeight: "bold", display: "inline-block" }}>
-          {blockchain?.verified ? "✓ Blockchain Verified" : "⚠️ Traceability Verification Failed"}
+    <div className="verify-container" style={{ padding: "30px 20px", maxWidth: "600px", margin: "0 auto", fontFamily: "sans-serif", background: "#171311", minHeight: "100vh", color: "#fdfbf9" }}>
+      <div style={{ textAlign: "center", marginBottom: "30px" }}>
+        <div style={{ fontSize: "40px", marginBottom: "10px" }}>🐝</div>
+        <h1 style={{ color: "#f59e0b", margin: "0 0 5px 0" }}>Honey Chain</h1>
+        <p style={{ color: "#a39791", margin: "0 0 20px 0", fontSize: "14px" }}>AI-Powered Smart Beekeeping & Honey Traceability</p>
+        <div style={{ background: blockchain?.verified ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)", color: blockchain?.verified ? "#10b981" : "#ef4444", border: `1px solid ${blockchain?.verified ? "rgba(16, 185, 129, 0.2)" : "rgba(239, 68, 68, 0.2)"}`, padding: "10px 20px", borderRadius: "8px", fontWeight: "bold", display: "inline-block" }}>
+          {blockchain?.verified ? "✓ Blockchain Traceability Verified" : "⚠️ Traceability Verification Failed"}
         </div>
       </div>
 
-      <div style={{ background: "#fff", padding: "20px", borderRadius: "12px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)", marginBottom: "20px" }}>
-        <h2>Batch Information</h2>
-        <p><strong>Batch ID:</strong> {batch.batch_id}</p>
-        <p><strong>Product:</strong> {batch.product_name}</p>
-        <p><strong>Variety:</strong> {batch.honey_variety}</p>
-        <p><strong>Quality:</strong> {batch.quality_info}</p>
+      <div style={{ background: "#1c1714", padding: "24px", borderRadius: "12px", border: "1px solid #2a211e", marginBottom: "20px" }}>
+        <h2 style={{ margin: "0 0 15px 0", color: "#f59e0b", fontSize: "18px" }}>Batch Information</h2>
+        <div style={{ display: "grid", gap: "10px", color: "#d6cfc9" }}>
+          <p style={{ margin: 0 }}><strong>Batch ID:</strong> <span style={{ color: "#fdfbf9" }}>{batch.batch_id}</span></p>
+          <p style={{ margin: 0 }}><strong>Product:</strong> <span style={{ color: "#fdfbf9" }}>{batch.product_name}</span></p>
+          <p style={{ margin: 0 }}><strong>Variety:</strong> <span style={{ color: "#fdfbf9" }}>{batch.honey_variety}</span></p>
+          <p style={{ margin: 0 }}><strong>Harvest Date:</strong> <span style={{ color: "#fdfbf9" }}>{batch.harvest_date}</span></p>
+          <p style={{ margin: 0 }}><strong>Packaging Date:</strong> <span style={{ color: "#fdfbf9" }}>{batch.packaging_date}</span></p>
+          <p style={{ margin: 0 }}><strong>Quality:</strong> <span style={{ color: "#fdfbf9" }}>{batch.quality_info}</span></p>
+        </div>
       </div>
 
-      <div style={{ background: "#fff", padding: "20px", borderRadius: "12px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)" }}>
-        <h2>Traceability Timeline</h2>
-        <div className="timeline" style={{ borderLeft: "2px solid #d97706", paddingLeft: "15px", marginLeft: "10px" }}>
+      <div style={{ background: "#1c1714", padding: "24px", borderRadius: "12px", border: "1px solid #2a211e" }}>
+        <h2 style={{ margin: "0 0 20px 0", color: "#f59e0b", fontSize: "18px" }}>Traceability Timeline</h2>
+        <div className="timeline" style={{ borderLeft: "2px solid rgba(245, 158, 11, 0.3)", paddingLeft: "20px", marginLeft: "10px" }}>
           {(blockchain?.records || []).map((rec, i) => (
-            <div key={i} style={{ marginBottom: "15px", position: "relative" }}>
-              <div style={{ position: "absolute", left: "-21px", top: "2px", width: "10px", height: "10px", background: "#d97706", borderRadius: "50%" }}></div>
-              <strong>{rec.event_type}</strong>
-              <div style={{ fontSize: "0.85em", color: "#666" }}>{new Date(rec.created_at).toLocaleString()}</div>
-              <div style={{ fontSize: "0.75em", color: "#999", wordBreak: "break-all" }}>Hash: {rec.current_hash.substring(0, 16)}...</div>
+            <div key={i} style={{ marginBottom: "20px", position: "relative" }}>
+              <div style={{ position: "absolute", left: "-27px", top: "4px", width: "12px", height: "12px", background: "#f59e0b", borderRadius: "50%", boxShadow: "0 0 0 4px rgba(245, 158, 11, 0.1)" }}></div>
+              <strong style={{ display: "block", color: "#fdfbf9", fontSize: "16px", marginBottom: "4px" }}>{rec.event_type}</strong>
+              <div style={{ fontSize: "13px", color: "#a39791", marginBottom: "4px" }}>{new Date(rec.created_at).toLocaleString()}</div>
+              <div style={{ fontSize: "12px", color: "#8a7c76", fontFamily: "monospace", wordBreak: "break-all" }}>Hash: {rec.current_hash}</div>
             </div>
           ))}
         </div>
+        <p style={{ textAlign: "center", fontSize: "12px", color: "#a39791", marginTop: "20px", fontStyle: "italic" }}>Tamper-evident hash-chain prototype.</p>
       </div>
     </div>
   );

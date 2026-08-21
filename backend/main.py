@@ -24,7 +24,7 @@ load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-BUSINESS_NAME = "Gir Honey Apiaries"
+BUSINESS_NAME = "Golden Hive Honey Farm"
 
 supabase: Client = create_client(
     SUPABASE_URL,
@@ -772,7 +772,7 @@ def chat(request: ChatRequest):
         supabase
         .table("businesses")
         .select("*")
-        .eq("name", "Gir Honey Apiaries")
+        .eq("name", "Golden Hive Honey Farm")
         .single()
         .execute()
     )
@@ -966,7 +966,7 @@ def whatsapp_order(request: WhatsAppOrderRequest):
         })
 
     invoice_result = generate_invoice(
-        business_name="Gir Honey Apiaries",
+        business_name="Golden Hive Honey Farm",
         customer_name=request.customer_name,
         items=invoice_items,
         gst_percent=0,
@@ -1061,7 +1061,7 @@ def process_whatsapp_order_logic(customer_phone: str, customer_name: str, invoic
         return {"success": True, "received": True, "message": "Order creation failed"}
     
     invoice_result = generate_invoice(
-        business_name="Gir Honey Apiaries",
+        business_name="Golden Hive Honey Farm",
         customer_name=customer_name,
         items=invoice_items,
         gst_percent=0,
@@ -1155,7 +1155,7 @@ async def zavu_webhook(request: Request):
         supabase
         .table("businesses")
         .select("*")
-        .eq("name", "Gir Honey Apiaries")
+        .eq("name", "Golden Hive Honey Farm")
         .single()
         .execute()
     )
@@ -1294,7 +1294,7 @@ TASK:
         # Create the invoice internally so we know the final payable amount,
         # but DO NOT send the invoice to the customer yet.
         invoice_result = generate_invoice(
-            business_name="Gir Honey Apiaries",
+            business_name="Golden Hive Honey Farm",
             customer_name=pending_order.get("customer_name", "WhatsApp Customer"),
             items=invoice_items,
             gst_percent=0,

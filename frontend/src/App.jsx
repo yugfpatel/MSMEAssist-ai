@@ -5,11 +5,13 @@ import VerifyBatch from "./VerifyBatch";
 
 const navItems = [
   { id: "overview", label: "Overview", icon: "⌂" },
-  { id: "honeychain", label: "Apiaries & Traceability", icon: "🐝" },
+  { id: "hives", label: "Hives & IoT", icon: "🐝" },
+  { id: "harvests", label: "Harvests", icon: "🍯" },
+  { id: "batches", label: "Traceability", icon: "🔗" },
+  { id: "products", label: "Inventory", icon: "📦" },
   { id: "orders", label: "Orders", icon: "🛒" },
   { id: "payments", label: "Payments", icon: "₹" },
   { id: "invoices", label: "Invoices", icon: "▤" },
-  { id: "products", label: "Inventory", icon: "📦" },
 ];
 
 function App() {
@@ -259,8 +261,8 @@ function App() {
       <div className="login-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#0a0a0a', fontFamily: 'sans-serif' }}>
         <form onSubmit={handleLogin} className="login-form panel" style={{ margin: 'auto', width: '100%', maxWidth: '400px', padding: '32px', background: '#141414', border: '1px solid #222', borderRadius: '12px' }}>
           <div style={{ textAlign: "center", fontSize: "40px", marginBottom: "10px" }}>🐝</div>
-          <h2 style={{ textAlign: 'center', marginBottom: '8px', color: '#f59e0b', fontSize: '28px' }}>HoneyChain AI</h2>
-          <p style={{ textAlign: 'center', color: '#888', marginBottom: '24px', fontSize: '18px' }}>Apiary & E-Commerce Dashboard</p>
+          <h2 style={{ textAlign: 'center', marginBottom: '8px', color: '#f59e0b', fontSize: '28px' }}>Honey Chain</h2>
+          <p style={{ textAlign: 'center', color: '#888', marginBottom: '24px', fontSize: '15px' }}>AI-Powered Smart Beekeeping & Honey Traceability</p>
           
           <label style={{ display: 'block', marginBottom: '8px', color: '#ccc', fontSize: '18px' }}>Email</label>
           <input 
@@ -295,8 +297,8 @@ function App() {
         <div className="brand">
           <div className="brand-mark" style={{ background: "rgba(245, 158, 11, 0.1)", border: "1px solid rgba(245, 158, 11, 0.2)" }}>🐝</div>
           <div>
-            <strong style={{ color: "#f59e0b" }}>HoneyChain AI</strong>
-            <span>Traceability & Sales</span>
+            <strong style={{ color: "#f59e0b" }}>Honey Chain</strong>
+            <span>Smart Apiary Platform</span>
           </div>
         </div>
 
@@ -346,7 +348,7 @@ function App() {
           <section>
             <div className="welcome-row">
               <div>
-                <h2>{business?.name || "Gir Honey Apiaries"}</h2>
+                <h2>{business?.name || "Golden Hive Honey Farm"}</h2>
                 <p>Here's what is happening with your apiary today.</p>
               </div>
               <button className="primary-btn" onClick={() => setActive("orders")}>View Orders →</button>
@@ -566,22 +568,22 @@ function App() {
         )}
 
 
-        {active === "honeychain" && (
+        {["hives", "harvests", "batches"].includes(active) && (
           <section>
             <div className="page-intro">
-              <h2>Honey Chain (SIH26021)</h2>
+              <h2>Honey Chain Subsystem</h2>
               <p>Blockchain-based traceability and smart beekeeping management.</p>
             </div>
-            <HoneyChain />
+            <HoneyChain activeSection={active} />
           </section>
         )}
       </main>
 
       <style>{`
 * { box-sizing: border-box; }
-body { margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #171311; color: #fdfbf9; }
+body { margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background-color: #171311; background-image: radial-gradient(rgba(245, 158, 11, 0.04) 2px, transparent 2px); background-size: 32px 32px; color: #fdfbf9; }
 button { font: inherit; }
-.app-shell { min-height: 100vh; display: flex; background: #171311; color: #fdfbf9; }
+.app-shell { min-height: 100vh; display: flex; background-color: #171311; background-image: radial-gradient(rgba(245, 158, 11, 0.04) 2px, transparent 2px); background-size: 32px 32px; color: #fdfbf9; }
 .sidebar { width: 250px; background: #120e0c; color: #fdfbf9; padding: 24px 16px; display: flex; flex-direction: column; position: fixed; inset: 0 auto 0 0; border-right: 1px solid #2a211e; }
 .brand { display: flex; align-items: center; gap: 11px; padding: 4px 10px 30px; }
 .brand-mark { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; font-weight: 900; font-size: 24px; }
