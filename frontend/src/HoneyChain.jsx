@@ -57,57 +57,62 @@ export default function HoneyChain() {
 
   return (
     <div className="honey-chain-module">
-      <div className="tabs" style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+      <div className="tabs" style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
         {["overview", "hives", "harvests", "batches"].map(tab => (
           <button 
             key={tab} 
             onClick={() => setActiveTab(tab)}
-            style={{ padding: "8px 16px", background: activeTab === tab ? "#d97706" : "#eee", color: activeTab === tab ? "#fff" : "#000", border: "none", borderRadius: "4px", cursor: "pointer" }}
+            className={activeTab === tab ? "primary-btn" : "ghost-btn"}
+            style={{ textTransform: "capitalize", padding: "8px 18px", fontSize: "14px", borderRadius: "20px" }}
           >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            {tab}
           </button>
         ))}
       </div>
 
-      {loading && <p>Loading Honey Chain data...</p>}
+      {loading && <p style={{ color: "#8f96a2" }}>Loading apiary data...</p>}
 
       {!loading && activeTab === "overview" && (
         <div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-            <h2>Honey Chain Dashboard</h2>
+            <h2 style={{ fontSize: "20px", color: "#f59e0b" }}>Apiary Overview</h2>
             <button 
+              className="ghost-btn"
               onClick={async () => {
                 if(!window.confirm("Generate demo hives, harvests, and batches?")) return;
                 setLoading(true);
                 try {
                   const hiveRes = await API.post("/api/honey/hives", { apiary_location: "Gir Forest Edge", latitude: 21.1, longitude: 70.8, colony_type: "Apis cerana indica", installation_date: "2026-01-15", status: "Active", queen_status: "Healthy" });
                   if(hiveRes.data.hive) {
-                    const harvRes = await API.post("/api/honey/harvests", { hive_id: hiveRes.data.hive.id, harvest_date: "2026-08-10", honey_type: "Wildflower", quantity: 15.5, quality_grade: "A+", moisture_percentage: 17.2 });
+                    const harvRes = await API.post("/api/honey/harvests", { hive_id: hiveRes.data.hive.id, harvest_date: "2026-08-10", honey_type: "Wildflower", quantity: 15.5, quality_grade: "Premium", moisture_percentage: 17.2 });
                     if(harvRes.data.harvest) {
-                      await API.post("/api/honey/batches", { batch_id: "HC-DEMO-" + Math.floor(Math.random()*10000), harvest_id: harvRes.data.harvest.id, hive_id: hiveRes.data.hive.id, product_name: "Pure Gir Honey", honey_variety: "Wildflower", quantity: 15, harvest_date: "2026-08-10", packaging_date: "2026-08-12", quality_info: "Raw, Unfiltered, Lab Tested A+", status: "Available" });
+                      await API.post("/api/honey/batches", { batch_id: "HC-DEMO-" + Math.floor(Math.random()*10000), harvest_id: harvRes.data.harvest.id, hive_id: hiveRes.data.hive.id, product_name: "Pure Gir Honey", honey_variety: "Wildflower", quantity: 15, harvest_date: "2026-08-10", packaging_date: "2026-08-12", quality_info: "Raw, Unfiltered, Lab Tested", status: "Available" });
                     }
                   }
                   await loadData();
                 } catch(e) { console.error(e); }
                 setLoading(false);
               }}
-              style={{ padding: "8px 16px", background: "#10b981", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}
+              style={{ color: "#10b981", borderColor: "#10b981" }}
             >
               🪄 Generate Demo Data
             </button>
           </div>
-          <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
-            <div style={{ padding: "20px", background: "#fff", borderRadius: "8px", border: "1px solid #ddd", minWidth: "150px" }}>
-              <h3>Total Hives</h3>
-              <p style={{ fontSize: "24px", margin: 0 }}>{hives.length}</p>
+          <div className="stats-grid">
+            <div className="stat-card">
+              <div className="stat-icon" style={{ background: "rgba(245, 158, 11, 0.1)", color: "#f59e0b" }}>🐝</div>
+              <div className="stat-label">Active Hives</div>
+              <div className="stat-value">{hives.length}</div>
             </div>
-            <div style={{ padding: "20px", background: "#fff", borderRadius: "8px", border: "1px solid #ddd", minWidth: "150px" }}>
-              <h3>Harvests</h3>
-              <p style={{ fontSize: "24px", margin: 0 }}>{harvests.length}</p>
+            <div className="stat-card">
+              <div className="stat-icon" style={{ background: "rgba(245, 158, 11, 0.1)", color: "#f59e0b" }}>🍯</div>
+              <div className="stat-label">Total Harvests</div>
+              <div className="stat-value">{harvests.length}</div>
             </div>
-            <div style={{ padding: "20px", background: "#fff", borderRadius: "8px", border: "1px solid #ddd", minWidth: "150px" }}>
-              <h3>Honey Batches</h3>
-              <p style={{ fontSize: "24px", margin: 0 }}>{batches.length}</p>
+            <div className="stat-card">
+              <div className="stat-icon" style={{ background: "rgba(245, 158, 11, 0.1)", color: "#f59e0b" }}>📦</div>
+              <div className="stat-label">Traceable Batches</div>
+              <div className="stat-value">{batches.length}</div>
             </div>
           </div>
         </div>
@@ -115,52 +120,66 @@ export default function HoneyChain() {
 
       {!loading && activeTab === "hives" && (
         <div>
-          <h2>Hive Management</h2>
-          {hives.map(hive => (
-            <div key={hive.id} style={{ background: "#fff", padding: "15px", marginBottom: "10px", borderRadius: "8px", border: "1px solid #ddd" }}>
-              <h3>{hive.apiary_location} - {hive.colony_type}</h3>
-              <p>Status: {hive.status} | Queen: {hive.queen_status}</p>
-              <button onClick={() => demoIoT(hive.id)}>Simulate Demo IoT Data</button>
-              <button onClick={() => loadInsights(hive.id)} style={{ marginLeft: "10px" }}>Get AI Insights</button>
-              
-              {sensorData[hive.id] && sensorData[hive.id].length > 0 && (
-                <div style={{ marginTop: "10px", fontSize: "0.9em", background: "#f9f9f9", padding: "10px" }}>
-                  <strong>Latest Sensor:</strong> Temp: {sensorData[hive.id][0].temperature.toFixed(1)}°C, Hum: {sensorData[hive.id][0].humidity.toFixed(1)}%, Wt: {sensorData[hive.id][0].weight.toFixed(1)}kg
+          <h2 style={{ fontSize: "20px", color: "#f59e0b", marginBottom: "16px" }}>Hive Management</h2>
+          <div className="product-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
+            {hives.map(hive => (
+              <div key={hive.id} className="panel product-card" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <div>
+                    <h3 style={{ color: "#fff", margin: 0 }}>{hive.apiary_location}</h3>
+                    <span style={{ color: "#8f96a2", fontSize: "13px" }}>{hive.colony_type}</span>
+                  </div>
+                  <span className="live-badge" style={{ background: "rgba(245,158,11,0.1)", color: "#f59e0b" }}>{hive.status}</span>
                 </div>
-              )}
-              
-              {insights[hive.id] && (
-                <div style={{ marginTop: "10px", background: "#f0fdf4", padding: "10px", borderRadius: "4px", border: "1px solid #bbf7d0" }}>
-                  <strong>🤖 AI Insight ({insights[hive.id].risk_level} Risk):</strong> {insights[hive.id].health_summary}
-                  <br /><em>Recommendation:</em> {insights[hive.id].recommended_action}
+                
+                <div style={{ fontSize: "14px", color: "#d7dbe1" }}>Queen: {hive.queen_status}</div>
+                
+                <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
+                  <button className="ghost-btn" onClick={() => demoIoT(hive.id)} style={{ flex: 1, fontSize: "12px" }}>📶 Ping IoT</button>
+                  <button className="ghost-btn" onClick={() => loadInsights(hive.id)} style={{ flex: 1, fontSize: "12px", color: "#a855f7", borderColor: "rgba(168,85,247,0.3)" }}>✨ AI Analyze</button>
                 </div>
-              )}
-            </div>
-          ))}
+                
+                {sensorData[hive.id] && sensorData[hive.id].length > 0 && (
+                  <div style={{ marginTop: "4px", fontSize: "12px", background: "#171a20", padding: "10px", borderRadius: "8px", border: "1px solid #292e36", color: "#9aa1ad" }}>
+                    <div style={{ marginBottom: "4px", color: "#f5f7fa" }}><strong>Live Sensors</strong></div>
+                    Temp: {sensorData[hive.id][0].temperature.toFixed(1)}°C | Hum: {sensorData[hive.id][0].humidity.toFixed(1)}% | Wt: {sensorData[hive.id][0].weight.toFixed(1)}kg
+                  </div>
+                )}
+                
+                {insights[hive.id] && (
+                  <div style={{ marginTop: "4px", background: "rgba(168,85,247,0.05)", padding: "12px", borderRadius: "8px", border: "1px solid rgba(168,85,247,0.2)", fontSize: "13px" }}>
+                    <strong style={{ color: "#c084fc", display: "block", marginBottom: "4px" }}>🤖 AI Insight ({insights[hive.id].risk_level} Risk)</strong> 
+                    <span style={{ color: "#d7dbe1", display: "block", marginBottom: "6px" }}>{insights[hive.id].health_summary}</span>
+                    <em style={{ color: "#9aa1ad" }}>Action: {insights[hive.id].recommended_action}</em>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
       {!loading && activeTab === "harvests" && (
-        <div>
-          <h2>Harvest Records</h2>
-          <table style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
+        <div className="panel table-panel">
+          <h2 style={{ fontSize: "20px", color: "#f59e0b", marginBottom: "16px" }}>Harvest Records</h2>
+          <table>
             <thead>
-              <tr style={{ borderBottom: "2px solid #ddd" }}>
-                <th>Date</th>
-                <th>Hive Location</th>
-                <th>Honey Type</th>
-                <th>Quantity</th>
-                <th>Quality Grade</th>
+              <tr>
+                <th>DATE</th>
+                <th>APIARY</th>
+                <th>HONEY TYPE</th>
+                <th>YIELD</th>
+                <th>QUALITY</th>
               </tr>
             </thead>
             <tbody>
               {harvests.map(h => (
-                <tr key={h.id} style={{ borderBottom: "1px solid #eee" }}>
+                <tr key={h.id}>
                   <td>{h.harvest_date}</td>
-                  <td>{h.hives?.apiary_location}</td>
+                  <td><strong style={{ color: "#f0f2f5" }}>{h.hives?.apiary_location}</strong></td>
                   <td>{h.honey_type}</td>
-                  <td>{h.quantity} {h.unit}</td>
-                  <td>{h.quality_grade}</td>
+                  <td style={{ color: "#f59e0b", fontWeight: "bold" }}>{h.quantity} {h.unit}</td>
+                  <td><span className="status completed" style={{ background: "rgba(245,158,11,0.1)", color: "#f59e0b" }}>{h.quality_grade}</span></td>
                 </tr>
               ))}
             </tbody>
@@ -170,21 +189,30 @@ export default function HoneyChain() {
 
       {!loading && activeTab === "batches" && (
         <div>
-          <h2>Honey Batches (Traceability)</h2>
-          {batches.map(b => (
-            <div key={b.id} style={{ background: "#fff", padding: "15px", marginBottom: "10px", borderRadius: "8px", border: "1px solid #ddd" }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <h3>{b.batch_id} - {b.product_name}</h3>
-                <span style={{ padding: "4px 8px", background: "#d97706", color: "#fff", borderRadius: "12px", fontSize: "0.8em" }}>{b.status}</span>
-              </div>
-              <p>Variety: {b.honey_variety} | Packaged: {b.packaging_date} | Quality: {b.quality_info}</p>
-              <div style={{ marginTop: "10px" }}>
-                <a href={`/verify/batch/${b.batch_id}`} target="_blank" rel="noreferrer" style={{ display: "inline-block", padding: "6px 12px", background: "#000", color: "#fff", textDecoration: "none", borderRadius: "4px" }}>
-                  Scan QR / View Public Traceability
+          <h2 style={{ fontSize: "20px", color: "#f59e0b", marginBottom: "16px" }}>Traceability Batches</h2>
+          <div className="product-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))" }}>
+            {batches.map(b => (
+              <div key={b.id} className="panel product-card" style={{ padding: "20px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
+                  <div>
+                    <h3 style={{ margin: 0, color: "#f5f7fa", fontSize: "18px" }}>{b.product_name}</h3>
+                    <span style={{ color: "#f59e0b", fontSize: "13px", fontFamily: "monospace", letterSpacing: "1px" }}>{b.batch_id}</span>
+                  </div>
+                  <span className="live-badge" style={{ background: "rgba(16, 185, 129, 0.1)", color: "#10b981" }}>{b.status}</span>
+                </div>
+                
+                <div style={{ fontSize: "14px", color: "#9da4af", marginBottom: "16px", lineHeight: "1.6" }}>
+                  <div><strong>Variety:</strong> {b.honey_variety}</div>
+                  <div><strong>Packaged:</strong> {b.packaging_date}</div>
+                  <div><strong>Quality:</strong> {b.quality_info}</div>
+                </div>
+                
+                <a href={`/verify/batch/${b.batch_id}`} target="_blank" rel="noreferrer" style={{ display: "block", textAlign: "center", padding: "10px", background: "rgba(245, 158, 11, 0.1)", color: "#f59e0b", textDecoration: "none", borderRadius: "8px", fontWeight: "bold", border: "1px solid rgba(245, 158, 11, 0.2)", transition: "all 0.2s" }} onMouseOver={e => e.currentTarget.style.background="rgba(245, 158, 11, 0.2)"} onMouseOut={e => e.currentTarget.style.background="rgba(245, 158, 11, 0.1)"}>
+                  🔍 View Public Traceability
                 </a>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
     </div>

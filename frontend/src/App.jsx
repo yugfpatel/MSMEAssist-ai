@@ -259,8 +259,9 @@ function App() {
     return (
       <div className="login-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#0a0a0a', fontFamily: 'sans-serif' }}>
         <form onSubmit={handleLogin} className="login-form panel" style={{ margin: 'auto', width: '100%', maxWidth: '400px', padding: '32px', background: '#141414', border: '1px solid #222', borderRadius: '12px' }}>
-          <h2 style={{ textAlign: 'center', marginBottom: '8px', color: '#fff', fontSize: '28px' }}>MSMEAssist AI</h2>
-          <p style={{ textAlign: 'center', color: '#888', marginBottom: '24px', fontSize: '18px' }}>Business Dashboard</p>
+          <div style={{ textAlign: "center", fontSize: "40px", marginBottom: "10px" }}>🐝</div>
+          <h2 style={{ textAlign: 'center', marginBottom: '8px', color: '#f59e0b', fontSize: '28px' }}>HoneyChain AI</h2>
+          <p style={{ textAlign: 'center', color: '#888', marginBottom: '24px', fontSize: '18px' }}>Apiary & E-Commerce Dashboard</p>
           
           <label style={{ display: 'block', marginBottom: '8px', color: '#ccc', fontSize: '18px' }}>Email</label>
           <input 
@@ -283,7 +284,7 @@ function App() {
           {loginError && <div style={{ color: '#ff4d4f', marginBottom: '16px', textAlign: 'center', fontSize: '18px', background: 'rgba(255,77,79,0.1)', padding: '8px', borderRadius: '6px' }}>{loginError}</div>}
           
           <button type="submit" className="primary-btn" style={{ width: '100%', padding: '12px', cursor: 'pointer', fontWeight: 'bold' }}>Login</button>
-          <p style={{ textAlign: 'center', color: '#666', marginTop: '24px', fontSize: '16px' }}>AI-powered business automation</p>
+          <p style={{ textAlign: 'center', color: '#666', marginTop: '24px', fontSize: '16px' }}>AI-powered apiary automation</p>
         </form>
       </div>
     );
@@ -293,10 +294,10 @@ function App() {
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-mark">M</div>
+          <div className="brand-mark" style={{ background: "rgba(245, 158, 11, 0.1)", border: "1px solid rgba(245, 158, 11, 0.2)" }}>🐝</div>
           <div>
-            <strong>MSMEAssist AI</strong>
-            <span>AI Business OS</span>
+            <strong style={{ color: "#f59e0b" }}>HoneyChain AI</strong>
+            <span>Traceability & Sales</span>
           </div>
         </div>
 
@@ -330,7 +331,7 @@ function App() {
       <main className="main-content">
         <header className="topbar">
           <div>
-            <div className="eyebrow">BUSINESS DASHBOARD</div>
+            <div className="eyebrow">APIARY DASHBOARD</div>
             <h1>{title}</h1>
           </div>
           <div className="topbar-right">
@@ -346,8 +347,8 @@ function App() {
           <section>
             <div className="welcome-row">
               <div>
-                <h2>{business?.name || "Shree Restaurant"}</h2>
-                <p>Here's what is happening with your business today.</p>
+                <h2>{business?.name || "Gir Honey Apiaries"}</h2>
+                <p>Here's what is happening with your apiary today.</p>
               </div>
               <button className="primary-btn" onClick={() => setActive("orders")}>View Orders →</button>
             </div>
@@ -601,7 +602,7 @@ button { font: inherit; }
 nav { display: grid; gap: 5px; }
 .nav-item { border: 0; color: #9ba2ae; background: transparent; width: 100%; padding: 11px 12px; border-radius: 9px; display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; font-size: 17px; font-weight: 600; }
 .nav-item:hover { background: #171a20; color: #ffffff; }
-.nav-item.active { background: #f5f7fa; color: #0b0d10; }
+.nav-item.active { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
 .nav-icon { width: 20px; text-align: center; font-size: 19px; }
 .sidebar-bottom { margin-top: auto; }
 .ai-card { border: 1px solid #252a32; border-radius: 12px; padding: 13px; display: flex; gap: 10px; margin-bottom: 10px; background: #111419; }
@@ -625,8 +626,8 @@ p { color: #a1a8b3; font-size: 16px; line-height: 1.6; margin: 6px 0 0; }
 .avatar { width: 34px; height: 34px; border-radius: 50%; background: #f5f7fa; color: #111318; display: grid; place-items: center; font-size: 16px; font-weight: 700; }
 .welcome-row, .page-intro { margin-bottom: 24px; }
 .welcome-row { display: flex; justify-content: space-between; align-items: end; }
-.primary-btn { background: #f5f7fa; color: #0b0d10; border: 0; padding: 10px 15px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; }
-.primary-btn:hover { transform: translateY(-1px); background: #ffffff; }
+.primary-btn { background: #d97706; color: #fff; border: 0; padding: 10px 15px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.primary-btn:hover { transform: translateY(-1px); background: #f59e0b; }
 .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 18px; }
 .stat-card, .panel, .product-card { background: #111419; border: 1px solid #242932; border-radius: 12px; }
 .stat-card { padding: 17px; position: relative; }

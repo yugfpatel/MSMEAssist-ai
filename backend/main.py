@@ -24,7 +24,7 @@ load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-BUSINESS_NAME = "Shree Restaurant"
+BUSINESS_NAME = "Gir Honey Apiaries"
 
 supabase: Client = create_client(
     SUPABASE_URL,
