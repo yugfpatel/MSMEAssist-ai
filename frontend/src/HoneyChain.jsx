@@ -73,7 +73,29 @@ export default function HoneyChain() {
 
       {!loading && activeTab === "overview" && (
         <div>
-          <h2>Honey Chain Dashboard</h2>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+            <h2>Honey Chain Dashboard</h2>
+            <button 
+              onClick={async () => {
+                if(!window.confirm("Generate demo hives, harvests, and batches?")) return;
+                setLoading(true);
+                try {
+                  const hiveRes = await API.post("/api/honey/hives", { apiary_location: "Gir Forest Edge", latitude: 21.1, longitude: 70.8, colony_type: "Apis cerana indica", installation_date: "2026-01-15", status: "Active", queen_status: "Healthy" });
+                  if(hiveRes.data.hive) {
+                    const harvRes = await API.post("/api/honey/harvests", { hive_id: hiveRes.data.hive.id, harvest_date: "2026-08-10", honey_type: "Wildflower", quantity: 15.5, quality_grade: "A+", moisture_percentage: 17.2 });
+                    if(harvRes.data.harvest) {
+                      await API.post("/api/honey/batches", { batch_id: "HC-DEMO-" + Math.floor(Math.random()*10000), harvest_id: harvRes.data.harvest.id, hive_id: hiveRes.data.hive.id, product_name: "Pure Gir Honey", honey_variety: "Wildflower", quantity: 15, harvest_date: "2026-08-10", packaging_date: "2026-08-12", quality_info: "Raw, Unfiltered, Lab Tested A+", status: "Available" });
+                    }
+                  }
+                  await loadData();
+                } catch(e) { console.error(e); }
+                setLoading(false);
+              }}
+              style={{ padding: "8px 16px", background: "#10b981", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}
+            >
+              🪄 Generate Demo Data
+            </button>
+          </div>
           <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
             <div style={{ padding: "20px", background: "#fff", borderRadius: "8px", border: "1px solid #ddd", minWidth: "150px" }}>
               <h3>Total Hives</h3>
