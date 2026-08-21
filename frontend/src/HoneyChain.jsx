@@ -11,6 +11,12 @@ export default function HoneyChain({ activeSection = "overview" }) {
   const [sensorData, setSensorData] = useState({});
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState({});
+  const [showBatchForm, setShowBatchForm] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [isGeneratingBatch, setIsGeneratingBatch] = useState(false);
+  const [batchForm, setBatchForm] = useState({
+    batch_id: "", product_name: "", honey_variety: "", quantity: 0, harvest_date: "", packaging_date: "", quality_info: ""
+  });
 
   async function loadData() {
     setLoading(true);
@@ -46,6 +52,35 @@ export default function HoneyChain({ activeSection = "overview" }) {
       console.error(e);
     }
     setAnalyzing(prev => ({ ...prev, [hiveId]: false }));
+  }
+
+  async function handleAIGenerateBatch() {
+    if (!aiPrompt) return;
+    setIsGeneratingBatch(true);
+    try {
+      const res = await API.post("/api/honey/ai-generate-batch", { prompt: aiPrompt });
+      if (res.data.success && res.data.batch) {
+        setBatchForm(prev => ({ ...prev, ...res.data.batch }));
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Failed to generate batch from AI.");
+    }
+    setIsGeneratingBatch(false);
+  }
+
+  async function handleSaveBatch() {
+    try {
+      if (!batchForm.batch_id || !batchForm.product_name) return alert("Missing required fields");
+      await API.post("/api/honey/batches", { ...batchForm, status: "Available" });
+      setShowBatchForm(false);
+      setBatchForm({ batch_id: "", product_name: "", honey_variety: "", quantity: 0, harvest_date: "", packaging_date: "", quality_info: "" });
+      setAiPrompt("");
+      loadData();
+    } catch (e) {
+      console.error(e);
+      alert("Failed to save batch.");
+    }
   }
 
   async function demoIoT(hiveId) {
@@ -182,7 +217,45 @@ export default function HoneyChain({ activeSection = "overview" }) {
 
       {!loading && activeSection === "batches" && (
         <div>
-          <h2 style={{ fontSize: "20px", color: "#f59e0b", marginBottom: "16px" }}>Traceability Batches</h2>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+            <h2 style={{ fontSize: "20px", color: "#f59e0b", margin: 0 }}>Traceability Batches</h2>
+            <button className="primary-btn" onClick={() => setShowBatchForm(!showBatchForm)}>
+              {showBatchForm ? "Cancel" : "➕ Create Batch"}
+            </button>
+          </div>
+
+          {showBatchForm && (
+            <div className="panel" style={{ marginBottom: "24px", padding: "20px", background: "#1c1714", border: "1px solid #2a211e" }}>
+              <h3 style={{ color: "#f5f7fa", marginTop: 0, marginBottom: "16px" }}>New Honey Batch</h3>
+              
+              <div style={{ display: "flex", gap: "10px", marginBottom: "20px", background: "rgba(168,85,247,0.05)", padding: "16px", borderRadius: "8px", border: "1px solid rgba(168,85,247,0.2)" }}>
+                <input 
+                  type="text" 
+                  value={aiPrompt} 
+                  onChange={e => setAiPrompt(e.target.value)} 
+                  placeholder="e.g. Log a new 20kg batch of Premium Mustard Honey harvested today" 
+                  style={{ flex: 1, padding: "10px", borderRadius: "6px", border: "1px solid #2a211e", background: "#120e0c", color: "#fdfbf9" }}
+                />
+                <button className="ghost-btn" onClick={handleAIGenerateBatch} disabled={isGeneratingBatch} style={{ color: "#a855f7", borderColor: "rgba(168,85,247,0.3)", padding: "0 16px" }}>
+                  {isGeneratingBatch ? "⏳ Generating..." : "✨ Auto-fill with AI"}
+                </button>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "20px" }}>
+                <input type="text" placeholder="Batch ID (e.g. HC-001)" value={batchForm.batch_id} onChange={e => setBatchForm({...batchForm, batch_id: e.target.value})} style={{ padding: "10px", borderRadius: "6px", border: "1px solid #2a211e", background: "#120e0c", color: "#fdfbf9" }} />
+                <input type="text" placeholder="Product Name" value={batchForm.product_name} onChange={e => setBatchForm({...batchForm, product_name: e.target.value})} style={{ padding: "10px", borderRadius: "6px", border: "1px solid #2a211e", background: "#120e0c", color: "#fdfbf9" }} />
+                <input type="text" placeholder="Variety (e.g. Wildflower)" value={batchForm.honey_variety} onChange={e => setBatchForm({...batchForm, honey_variety: e.target.value})} style={{ padding: "10px", borderRadius: "6px", border: "1px solid #2a211e", background: "#120e0c", color: "#fdfbf9" }} />
+                <input type="number" placeholder="Quantity (kg)" value={batchForm.quantity || ""} onChange={e => setBatchForm({...batchForm, quantity: Number(e.target.value)})} style={{ padding: "10px", borderRadius: "6px", border: "1px solid #2a211e", background: "#120e0c", color: "#fdfbf9" }} />
+                <input type="date" placeholder="Harvest Date" value={batchForm.harvest_date} onChange={e => setBatchForm({...batchForm, harvest_date: e.target.value})} style={{ padding: "10px", borderRadius: "6px", border: "1px solid #2a211e", background: "#120e0c", color: "#fdfbf9" }} />
+                <input type="date" placeholder="Packaging Date" value={batchForm.packaging_date} onChange={e => setBatchForm({...batchForm, packaging_date: e.target.value})} style={{ padding: "10px", borderRadius: "6px", border: "1px solid #2a211e", background: "#120e0c", color: "#fdfbf9" }} />
+                <input type="text" placeholder="Quality Info (e.g. Lab Tested)" value={batchForm.quality_info} onChange={e => setBatchForm({...batchForm, quality_info: e.target.value})} style={{ gridColumn: "span 2", padding: "10px", borderRadius: "6px", border: "1px solid #2a211e", background: "#120e0c", color: "#fdfbf9" }} />
+              </div>
+
+              <div style={{ textAlign: "right" }}>
+                <button className="primary-btn" onClick={handleSaveBatch} style={{ background: "#f59e0b", color: "#171311", fontWeight: "bold" }}>Save & Mint Batch</button>
+              </div>
+            </div>
+          )}
           <div className="product-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))" }}>
             {batches.map(b => (
               <div key={b.id} className="panel product-card" style={{ padding: "20px" }}>

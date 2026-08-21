@@ -153,6 +153,51 @@ Provide JSON response:
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
 
+    @app.post("/api/honey/ai-generate-batch")
+    async def ai_generate_batch(request: Request):
+        try:
+            data = await request.json()
+            user_prompt = data.get("prompt", "")
+            
+            # Fetch random hive to associate if none specified (for demo simplicity)
+            hive_res = supabase.table("hives").select("id").limit(1).execute()
+            default_hive_id = hive_res.data[0]["id"] if hive_res.data else None
+            
+            sys_prompt = f"""
+You are an AI assistant for ApisAI, a smart apiary platform.
+The user wants to log a new honey batch based on their notes.
+Extract or reasonably infer the details to create a structured JSON payload for the database.
+Assume today's date is {datetime.utcnow().strftime('%Y-%m-%d')} if not specified.
+Always generate a batch_id like 'HC-AI-' followed by 4 random digits.
+If a hive_id is not identifiable, use this default: {default_hive_id}
+
+Provide ONLY a valid JSON object matching this schema:
+{{
+  "batch_id": "string",
+  "hive_id": "string",
+  "product_name": "string",
+  "honey_variety": "string",
+  "quantity": number,
+  "harvest_date": "YYYY-MM-DD",
+  "packaging_date": "YYYY-MM-DD",
+  "quality_info": "string",
+  "status": "Available"
+}}
+
+User Notes: {user_prompt}
+"""
+            response = gemini_client.models.generate_content(
+                model="gemini-3.6-flash",
+                contents=sys_prompt,
+            )
+            raw = response.text.strip()
+            if raw.startswith("```json"):
+                raw = raw.replace("```json", "").replace("```", "").strip()
+            return {"success": True, "batch": json.loads(raw)}
+        except Exception as e:
+            print("AI Generate error:", e)
+            raise HTTPException(status_code=500, detail=str(e))
+
     # --- 6. Blockchain Traceability ---
     def record_blockchain_event(supabase_client, batch_id: str, event_type: str, event_data: dict):
         try:
