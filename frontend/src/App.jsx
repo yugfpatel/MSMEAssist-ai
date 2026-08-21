@@ -539,9 +539,9 @@ function App() {
             <div className="product-grid">
               {products.length ? products.map((product) => (
                 <div className="product-card" key={product.id || product.name}>
-                  <div className="product-image">🍽️</div>
+                  <div className="product-image">🍯</div>
                   <div className="product-info">
-                    <span className="product-category">MENU ITEM</span>
+                    <span className="product-category">HONEY PRODUCT</span>
                     <h3>{product.name}</h3>
                     <p>{product.description || "Available through WhatsApp ordering."}</p>
                     <div className="product-footer">
