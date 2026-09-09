@@ -191,20 +191,8 @@ PUBLIC_BASE_URL = os.getenv(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        origin.strip().rstrip("/")
-        for origin in os.getenv(
-            "FRONTEND_URLS",
-            "http://localhost:5173,http://127.0.0.1:5173",
-        ).split(",")
-        if origin.strip()
-    ],
-    # Vite selects the next open port when 5173 is already occupied, and its
-    # production preview uses a different local port. Permit local loopback
-    # origins on those ports without opening credentialed CORS to arbitrary
-    # websites.
-    allow_origin_regex=r"^https?://(localhost|127\.0\.0.1)(?::\d+)?$",
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
