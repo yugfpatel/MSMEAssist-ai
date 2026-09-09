@@ -684,7 +684,7 @@ function OrdersTable({ orders, full = false }) {
                              <span>
                                <span style={{ color: "#aaa", marginRight: "8px" }}>{it.quantity}x</span> {it.product}
                                {it.batch_id && (
-                                 <a href={`/verify/batch/${it.batch_id}`} target="_blank" rel="noreferrer" style={{ marginLeft: "12px", fontSize: "13px", color: "#d97706", textDecoration: "none", background: "rgba(217, 119, 6, 0.1)", padding: "2px 8px", borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                                 <a href={`/verify/batch/${it.batch_id}`} target="_blank" rel="noreferrer" style={{ marginLeft: "12px", fontSize: "13px", color: "#38bdf8", textDecoration: "none", background: "rgba(56, 189, 248, 0.1)", padding: "2px 8px", borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
                                     Verify Batch
                                  </a>
                                )}
