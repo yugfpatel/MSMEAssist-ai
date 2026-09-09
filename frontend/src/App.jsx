@@ -3,699 +3,150 @@ import API from "./api";
 import HoneyChain from "./HoneyChain";
 import VerifyBatch from "./VerifyBatch";
 
-const navItems = [
-  { id: "overview", label: "Overview", icon: "⌂" },
-  { id: "hives", label: "Hives & IoT", icon: "" },
-  { id: "harvests", label: "Harvests", icon: "" },
-  { id: "batches", label: "Traceability", icon: "🔗" },
-  { id: "products", label: "Inventory", icon: "" },
-  { id: "orders", label: "Orders", icon: "🛒" },
-  { id: "payments", label: "Payments", icon: "₹" },
-  { id: "invoices", label: "Invoices", icon: "▤" },
+const NAV = [
+  { id: "overview",  label: "Overview",      icon: "◉" },
+  { id: "hives",     label: "Hives & IoT",   icon: "⬡" },
+  { id: "harvests",  label: "Harvests",      icon: "◈" },
+  { id: "batches",   label: "Traceability",  icon: "⬡" },
+  { id: "products",  label: "Inventory",     icon: "▦" },
+  { id: "orders",    label: "Orders",        icon: "◫" },
+  { id: "payments",  label: "Payments",      icon: "₹" },
+  { id: "invoices",  label: "Invoices",      icon: "◳" },
 ];
 
-function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem("msmeassist_logged_in") === "true");
-  const [loginEmail, setLoginEmail] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-  const [loginError, setLoginError] = useState("");
-
-  const [active, setActive] = useState("overview");
-  const [business, setBusiness] = useState(null);
-  const [products, setProducts] = useState([]);
-  const [backendStatus, setBackendStatus] = useState("Connecting...");
-  const [summary, setSummary] = useState({});
-  const [orders, setOrders] = useState([]);
-  const [payments, setPayments] = useState([]);
-  const [invoices, setInvoices] = useState([]);
-  const [productForm, setProductForm] = useState({ name: "", description: "", price: "", stock: "" });
-  const [productSaving, setProductSaving] = useState(false);
-  const [productError, setProductError] = useState("");
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadDashboard() {
-      try {
-        setBackendStatus("Connecting...");
-
-        const homeResponse = await API.get("/", { timeout: 10000 });
-        console.log("BACKEND HOME RESPONSE:", homeResponse.data);
-
-        if (cancelled) return;
-        setBackendStatus("Connected");
-
-        try {
-          const businessResponse = await API.get("/business", { timeout: 5000 });
-          if (!cancelled) setBusiness(businessResponse.data);
-        } catch (businessError) {
-          console.error("BUSINESS API ERROR:", businessError);
-          if (!cancelled) setBusiness(null);
-        }
-
-        try {
-          const productsResponse = await API.get("/products", { timeout: 10000 });
-          if (!cancelled) setProducts(productsResponse.data || []);
-        } catch (productsError) {
-          console.error("PRODUCTS API ERROR:", productsError);
-          if (!cancelled) setProducts([]);
-        }
-
-        try {
-          const summaryResponse = await API.get("/dashboard/summary", { timeout: 5000 });
-          if (!cancelled) setSummary(summaryResponse.data?.summary || summaryResponse.data || {});
-        } catch (error) {
-          console.error("SUMMARY API ERROR:", error);
-        }
-
-        try {
-          const ordersResponse = await API.get("/dashboard/orders", { timeout: 5000 });
-          if (!cancelled) setOrders(ordersResponse.data?.orders || ordersResponse.data || []);
-        } catch (error) {
-          console.error("ORDERS API ERROR:", error);
-        }
-
-        try {
-          const paymentsResponse = await API.get("/dashboard/payments", { timeout: 5000 });
-          if (!cancelled) setPayments(paymentsResponse.data?.payments || paymentsResponse.data || []);
-        } catch (error) {
-          console.error("PAYMENTS API ERROR:", error);
-        }
-
-        try {
-          const invoicesResponse = await API.get("/dashboard/invoices", { timeout: 5000 });
-          if (!cancelled) setInvoices(invoicesResponse.data?.invoices || invoicesResponse.data || []);
-        } catch (error) {
-          console.error("INVOICES API ERROR:", error);
-        }
-      } catch (error) {
-        console.error("BACKEND ERROR:", error);
-        console.error("BACKEND CODE:", error.code);
-        console.error("BACKEND MESSAGE:", error.message);
-        console.error("BACKEND STATUS:", error.response?.status);
-        console.error("BACKEND DATA:", error.response?.data);
-        console.error("BACKEND URL:", error.config?.baseURL, error.config?.url);
-        if (!cancelled) {
-          setBackendStatus(
-            error.response
-              ? `Backend HTTP ${error.response.status}`
-              : error.code === "ERR_NETWORK"
-                ? "Network/CORS error"
-                : `Backend error: ${error.message || "Request failed"}`
-          );
-        }
-      }
-    }
-
-    loadDashboard();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  function handleLogin(e) {
-    e.preventDefault();
-    if (loginEmail === "admin@apis.ai" && loginPassword === "apisai") {
-      localStorage.setItem("msmeassist_logged_in", "true");
-      setIsLoggedIn(true);
-      setLoginError("");
-    } else {
-      setLoginError("Invalid email or password");
-    }
-  }
-
-  function handleLogout() {
-    localStorage.removeItem("msmeassist_logged_in");
-    setIsLoggedIn(false);
-  }
-
-  async function refreshProducts() {
-    const response = await API.get("/products", {
-      timeout: 10000,
-    });
-    setProducts(response.data || []);
-  }
-
-  async function handleDeleteInvoice(invoiceId) {
-    if (!window.confirm("Are you sure you want to delete this pending invoice/order?")) return;
-    try {
-      await API.delete(`/orders/${invoiceId}`);
-      setInvoices((prev) => prev.filter((inv) => inv.id !== invoiceId));
-      setOrders((prev) => prev.filter((ord) => ord.id !== invoiceId));
-      setPayments((prev) => prev.filter((pay) => pay.id !== invoiceId));
-      
-      const summaryResponse = await API.get("/dashboard/summary");
-      setSummary(summaryResponse.data?.summary || summaryResponse.data || {});
-    } catch (err) {
-      console.error("Error deleting invoice", err);
-      alert("Failed to delete. Please try again.");
-    }
-  }
-
-  async function addProduct(event) {
-    event.preventDefault();
-    setProductError("");
-
-    const name = productForm.name.trim();
-    const description = productForm.description.trim();
-    const price = Number(productForm.price);
-    const stock = Number(productForm.stock);
-
-    if (!name || productForm.price === "" || productForm.stock === "") {
-      setProductError("Name, price and availability are required.");
-      return;
-    }
-
-    if (!Number.isFinite(price) || price < 0) {
-      setProductError("Enter a valid price.");
-      return;
-    }
-
-    if (!Number.isFinite(stock) || stock < 0) {
-      setProductError("Enter a valid availability value.");
-      return;
-    }
-
-    try {
-      setProductSaving(true);
-
-      const response = await API.post(
-        "/products",
-        {
-          name,
-          description,
-          price,
-          stock,
-        },
-        {
-          timeout: 15000,
-        }
-      );
-
-      console.log("ADD PRODUCT RESPONSE:", response.data);
-      setProductForm({ name: "", description: "", price: "", stock: "" });
-      await refreshProducts();
-    } catch (error) {
-      console.error("ADD PRODUCT ERROR:", error);
-      console.error("CODE:", error.code);
-      console.error("MESSAGE:", error.message);
-      console.error("STATUS:", error.response?.status);
-      console.error("DATA:", error.response?.data);
-      console.error(
-        "URL:",
-        `${error.config?.baseURL || ""}${error.config?.url || ""}`
-      );
-
-      if (error.response) {
-        const detail = error.response.data?.detail;
-        const message = error.response.data?.message;
-        const backendMessage = Array.isArray(detail)
-          ? detail.map((item) => item?.msg || JSON.stringify(item)).join(", ")
-          : detail || message;
-        setProductError(
-          backendMessage || `Backend returned HTTP ${error.response.status}.`
-        );
-      } else if (error.code === "ERR_NETWORK") {
-        setProductError("Network/CORS error: browser cannot reach the backend.");
-      } else {
-        setProductError(error.message || "Could not add product.");
-      }
-    } finally {
-      setProductSaving(false);
-    }
-  }
-
-  async function removeProduct(product) {
-    if (!product.id) {
-      setProductError("This product has no database ID and cannot be removed.");
-      return;
-    }
-
-    if (!window.confirm(`Remove ${product.name}?`)) return;
-
-    try {
-      setProductError("");
-      setProductSaving(true);
-      await API.delete(`/products/${product.id}`);
-      await refreshProducts();
-    } catch (error) {
-      console.error("REMOVE PRODUCT ERROR:", error);
-      setProductError(error.response?.data?.detail || error.response?.data?.message || "Could not remove product.");
-    } finally {
-      setProductSaving(false);
-    }
-  }
-
-  const totalProducts = products.length;
-
-  const title = navItems.find((item) => item.id === active)?.label || "Overview";
-
-  const verifyMatch = window.location.pathname.match(/^\/verify\/batch\/([A-Za-z0-9-]+)/);
-  if (verifyMatch) {
-    return <VerifyBatch batchId={verifyMatch[1]} />;
-  }
-
-  if (!isLoggedIn) {
-    return (
-      <div className="login-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#09090b', fontFamily: 'sans-serif' }}>
-        <form onSubmit={handleLogin} className="login-form panel" style={{ margin: 'auto', width: '100%', maxWidth: '400px', padding: '32px', background: '#18181b', border: '1px solid #27272a', borderRadius: '12px' }}>
-          <div style={{ textAlign: "center", fontSize: "40px", marginBottom: "10px" }}></div>
-          <h2 style={{ textAlign: 'center', marginBottom: '8px', color: '#fafafa', fontSize: '28px' }}>APIS AI</h2>
-          <p style={{ textAlign: 'center', color: '#a1a1aa', marginBottom: '24px', fontSize: '15px' }}>AI-Powered Smart Beekeeping & Honey Traceability</p>
-          
-          <label style={{ display: 'block', marginBottom: '8px', color: '#a1a1aa', fontSize: '18px' }}>Email</label>
-          <input 
-            type="email" 
-            placeholder="admin@apis.ai" 
-            value={loginEmail} 
-            onChange={e => setLoginEmail(e.target.value)}
-            style={{ width: '100%', marginBottom: '16px', padding: '12px', background: '#09090b', border: '1px solid #333', borderRadius: '8px', color: '#f4f4f5', boxSizing: 'border-box' }}
-          />
-          
-          <label style={{ display: 'block', marginBottom: '8px', color: '#a1a1aa', fontSize: '18px' }}>Password</label>
-          <input 
-            type="password" 
-            placeholder="••••••••" 
-            value={loginPassword} 
-            onChange={e => setLoginPassword(e.target.value)}
-            style={{ width: '100%', marginBottom: '24px', padding: '12px', background: '#09090b', border: '1px solid #333', borderRadius: '8px', color: '#f4f4f5', boxSizing: 'border-box' }}
-          />
-          
-          {loginError && <div style={{ color: '#ff4d4f', marginBottom: '16px', textAlign: 'center', fontSize: '18px', background: 'rgba(255,77,79,0.1)', padding: '8px', borderRadius: '6px' }}>{loginError}</div>}
-          
-          <button type="submit" className="primary-btn" style={{ width: '100%', padding: '12px', cursor: 'pointer', fontWeight: 'bold' }}>Login</button>
-          <p style={{ textAlign: 'center', color: '#666', marginTop: '24px', fontSize: '16px' }}>AI-powered apiary automation</p>
-        </form>
-      </div>
-    );
-  }
-
-  return (
-    <div className="app-shell">
-      <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-mark" ></div>
-          <div>
-            <strong >APIS AI</strong>
-            <span>Smart Apiary Platform</span>
-          </div>
-        </div>
-
-        <div className="sidebar-label">WORKSPACE</div>
-        <nav>
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              className={`nav-item ${active === item.id ? "active" : ""}`}
-              onClick={() => setActive(item.id)}
-            >
-              <span className="nav-icon">{item.icon}</span>
-              {item.label}
-            </button>
-          ))}
-        </nav>
-
-        <div className="sidebar-bottom">
-          <div className="ai-card">
-            <div className="ai-dot" />
-            <div>
-              <strong>AI Assistant</strong>
-              <span>WhatsApp automation active</span>
-            </div>
-          </div>
-          <button className="settings-btn" onClick={() => alert("Settings coming next ")}>⚙ Settings</button>
-          <button className="settings-btn" onClick={handleLogout} style={{ marginTop: '8px', color: '#ff4d4f' }}>🚪 Logout</button>
-        </div>
-      </aside>
-
-      <main className="main-content">
-        <header className="topbar">
-          <div>
-            <div className="eyebrow">APIARY DASHBOARD</div>
-            <h1>{title}</h1>
-          </div>
-          <div className="topbar-right">
-            <div className="connection-pill">
-              <span className={`status-dot ${backendStatus === "Connected" ? "online" : ""}`} />
-              {backendStatus}
-            </div>
-
-          </div>
-        </header>
-
-        {active === "overview" && (
-          <section>
-            <div className="welcome-row">
-              <div>
-                <h2>{business?.name || "Golden Hive Honey Farm"}</h2>
-                <p>Here's what is happening with your apiary today.</p>
-              </div>
-              <button className="primary-btn" onClick={() => setActive("orders")}>View Orders →</button>
-            </div>
-
-            <div className="stats-grid">
-              <StatCard
-                label="Today's Revenue"
-                value={formatCurrency(summary.today_revenue)}
-                change=""
-                icon="₹"
-              />
-              <StatCard
-                label="Orders Today"
-                value={summary.today_orders ?? 0}
-                change=""
-                icon="🛒"
-              />
-              <StatCard
-                label="Pending Payments"
-                value={summary.pending_payments ?? 0}
-                change="Needs attention"
-                icon="◷"
-                warning
-              />
-              <StatCard
-                label="Products"
-                value={summary.total_products ?? totalProducts ?? 0}
-                change=""
-                icon=""
-              />
-            </div>
-
-            <div className="dashboard-grid">
-              <div className="panel large-panel">
-                <div className="panel-heading">
-                  <div>
-                    <h3>Revenue overview</h3>
-                    <span>Last 7 days</span>
-                  </div>
-                </div>
-                {Array.isArray(summary.revenue_last_7_days) && summary.revenue_last_7_days.length ? (
-                  <div className="chart">
-                    {summary.revenue_last_7_days.map((entry, index) => {
-                      let value = typeof entry === "object" && entry !== null ? entry.value : entry;
-                      value = Number(value) || 0;
-                      // Normalize to percentage for bar height (relative to max)
-                      const max = Math.max(...summary.revenue_last_7_days.map(e => typeof e === "object" && e !== null ? Number(e.value) || 0 : Number(e) || 0), 1);
-                      const height = max ? Math.round((value / max) * 100) : 0;
-                      
-                      const d = new Date();
-                      d.setDate(d.getDate() - (6 - index));
-                      const dayName = d.toLocaleDateString("en-US", { weekday: "short" });
-                      
-                      return (
-                        <div className="chart-col" key={index}>
-                          <div className="bar" style={{ height: `${height}%` }} />
-                          <span>{dayName}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <EmptyState text="No revenue data for the last 7 days." />
-                )}
-              </div>
-
-              <div className="panel">
-                <div className="panel-heading">
-                  <div>
-                    <h3>AI activity</h3>
-                    <span>WhatsApp automation</span>
-                  </div>
-                  <span className="live-badge">LIVE</span>
-                </div>
-                <div className="activity-list">
-                  <ActivityList orders={orders} payments={payments} invoices={invoices} />
-                </div>
-              </div>
-            </div>
-
-            <div className="panel table-panel">
-              <div className="panel-heading">
-                <div>
-                  <h3>Recent orders</h3>
-                  <span>Latest customer activity</span>
-                </div>
-                <button className="ghost-btn" onClick={() => setActive("orders")}>View all →</button>
-              </div>
-              <OrdersTable orders={orders} />
-            </div>
-          </section>
-        )}
-
-        {active === "orders" && (
-          <section>
-            <div className="page-intro"><h2>Orders</h2><p>Track WhatsApp orders from conversation to payment.</p></div>
-            <div className="panel table-panel"><OrdersTable orders={orders} full /></div>
-          </section>
-        )}
-
-        {active === "payments" && (
-          <section>
-            <div className="page-intro"><h2>Payments</h2><p>Monitor payments collected through ApisAI.</p></div>
-            <div className="stats-grid">
-              <StatCard
-                label="Collected"
-                value={formatCurrency(summary.month_revenue ?? summary.collected_amount)}
-                change="This month"
-                icon="₹"
-              />
-              <StatCard
-                label="Pending"
-                value={formatCurrency(summary.pending_amount)}
-                change=""
-                icon="◷"
-                warning
-              />
-              <StatCard
-                label="Success rate"
-                value={
-                  summary.payment_success_rate !== undefined && summary.payment_success_rate !== null
-                    ? `${Number(summary.payment_success_rate).toFixed(1)}%`
-                    : "0%"
-                }
-                change=""
-                icon="✓"
-              />
-            </div>
-            <div className="panel table-panel"><PaymentsTable payments={payments} /></div>
-          </section>
-        )}
-
-        {active === "invoices" && (
-          <section>
-            <div className="page-intro"><h2>Invoices</h2><p>Invoices generated automatically after successful payment.</p></div>
-            <div className="panel table-panel"><InvoicesTable invoices={invoices} onDelete={handleDeleteInvoice} /></div>
-          </section>
-        )}
-
-        {active === "products" && (
-          <section>
-            <div className="page-intro"><h2>Products</h2><p>Add or remove products directly from your Supabase database.</p></div>
-
-            <div className="panel product-manager">
-              <div className="panel-heading">
-                <div>
-                  <h3>Add product</h3>
-                  <span>Changes are saved directly to the database.</span>
-                </div>
-              </div>
-
-              <form className="product-form" onSubmit={addProduct}>
-                <input
-                  value={productForm.name}
-                  onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
-                  placeholder="Product name"
-                />
-                <input
-                  value={productForm.description}
-                  onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
-                  placeholder="Description"
-                />
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={productForm.price}
-                  onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}
-                  placeholder="Price"
-                />
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={productForm.stock}
-                  onChange={(e) => setProductForm({ ...productForm, stock: e.target.value })}
-                  placeholder="Availability (0 = not available)"
-                />
-                <button className="primary-btn" type="submit" disabled={productSaving}>
-                  {productSaving ? "Saving..." : "Add product"}
-                </button>
-              </form>
-
-              {productError && <div className="product-error">{productError}</div>}
-            </div>
-
-            <div className="product-grid">
-              {products.length ? products.map((product) => (
-                <div className="product-card" key={product.id || product.name}>
-                  <div className="product-image"></div>
-                  <div className="product-info">
-                    <span className="product-category">HONEY PRODUCT</span>
-                    <h3>{product.name}</h3>
-                    <p>{product.description || "Available through WhatsApp ordering."}</p>
-                    <div className="product-footer">
-                      <strong>₹{product.price}</strong>
-                      <div className="product-actions">
-                        <span className={Number(product.stock) > 0 ? "stock" : "stock low"}>
-                          {Number(product.stock) > 0 ? "Available" : "Not available"}
-                        </span>
-                        <button
-                          type="button"
-                          className="delete-btn"
-                          onClick={() => removeProduct(product)}
-                          disabled={productSaving}
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )) : <EmptyState text="No products found in Supabase." />}
-            </div>
-          </section>
-        )}
-
-
-        {["hives", "harvests", "batches"].includes(active) && (
-          <section>
-            <div className="page-intro">
-              <h2>ApisAI Subsystem</h2>
-              <p>Blockchain-based traceability and smart beekeeping management.</p>
-            </div>
-            <HoneyChain activeSection={active} />
-          </section>
-        )}
-      </main>
-
-    </div>
-  );
+/* ─── helpers ─────────────────────────────────────── */
+function fmt(v) {
+  return `₹${Number(v || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
 }
-
-function StatCard({ label, value, change, icon, warning }) {
-  return (
-    <div className="stat-card">
-      <div className="stat-icon">{icon}</div>
-      <div className="stat-label">{label}</div>
-      <div className="stat-value">{value}</div>
-      <div className={`stat-change ${warning ? "warning" : ""}`}>{change}</div>
-    </div>
-  );
-}
-
-function Activity({ title, detail, time }) {
-  return (
-    <div className="activity">
-      <div><strong>{title}</strong><span>{detail}</span></div>
-      <time>{time}</time>
-    </div>
-  );
-}
-
-
-function formatCurrency(value) {
-  return `₹${Number(value || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
-}
-
-function formatTime(value) {
-  if (!value) return "—";
-  const d = new Date(value);
-  if (isNaN(d.getTime())) return "—";
+function fmtTime(v) {
+  if (!v) return "—";
+  const d = new Date(v);
+  if (isNaN(d)) return "—";
   return d.toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" });
 }
+function Empty({ text }) {
+  return <div className="empty-state">{text}</div>;
+}
 
-function OrdersTable({ orders, full = false }) {
-  const [expandedId, setExpandedId] = useState(null);
-
-  if (!orders || !orders.length) {
-    return <EmptyState text="No orders yet." />;
-  }
-
-  const displayOrders = full ? orders : orders.slice(0, 5);
-
+/* ─── stat card ───────────────────────────────────── */
+function StatCard({ label, value, sub, warn }) {
   return (
-    <table>
+    <div className={"scard" + (warn ? " scard-warn" : "")}>
+      <div className="scard-label">{label}</div>
+      <div className="scard-value">{value}</div>
+      {sub && <div className={"scard-sub" + (warn ? " warn" : "")}>{sub}</div>}
+    </div>
+  );
+}
+
+/* ─── activity ────────────────────────────────────── */
+function ActivityList({ orders, payments, invoices }) {
+  const all = [];
+  (orders || []).forEach(o => {
+    if (o.created_at || o.time) all.push({ title: "Order received", detail: o.item_name || o.product_name || "Order", amount: fmt(o.total ?? o.amount), time: o.created_at || o.time });
+  });
+  (payments || []).forEach(p => {
+    if (p.created_at || p.time) all.push({ title: "Payment collected", detail: fmt(p.amount), amount: fmt(p.amount), time: p.created_at || p.time });
+  });
+  (invoices || []).forEach(i => {
+    if (i.created_at || i.time) all.push({ title: "Invoice delivered", detail: i.invoice_number || i.id || "Invoice", amount: fmt(i.total ?? i.amount), time: i.created_at || i.time });
+  });
+  all.sort((a, b) => new Date(b.time) - new Date(a.time));
+  const list = all.slice(0, 6);
+  if (!list.length) return <Empty text="No activity yet." />;
+  return (
+    <div className="activity-list">
+      {list.map((a, i) => (
+        <div className="act-row" key={i}>
+          <div className="act-left">
+            <span className="act-title">{a.title}</span>
+            <span className="act-detail">{a.detail}</span>
+          </div>
+          <div className="act-right">
+            <span className="act-amount">{a.amount}</span>
+            <time className="act-time">{fmtTime(a.time)}</time>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ─── bar chart ───────────────────────────────────── */
+function BarChart({ data }) {
+  if (!data || !data.length) return <Empty text="No revenue data for the last 7 days." />;
+  const values = data.map(e => Number(typeof e === "object" ? e.value : e) || 0);
+  const max = Math.max(...values, 1);
+  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  return (
+    <div className="bar-chart">
+      {values.map((v, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - (values.length - 1 - i));
+        return (
+          <div className="bar-col" key={i}>
+            <div className="bar-track">
+              <div className="bar-fill" style={{ height: `${Math.round((v / max) * 100)}%` }} />
+            </div>
+            <span className="bar-label">{days[d.getDay()]}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ─── orders table ────────────────────────────────── */
+function OrdersTable({ orders, full }) {
+  const [expanded, setExpanded] = useState(null);
+  const rows = full ? orders : (orders || []).slice(0, 5);
+  if (!rows.length) return <Empty text="No orders yet." />;
+  return (
+    <table className="data-table">
       <thead>
         <tr>
-          <th>CUSTOMER</th>
-          <th>ORDER</th>
-          <th>AMOUNT</th>
-          <th>STATUS</th>
-          <th>TIME</th>
+          <th>Customer</th>
+          <th>Items</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Time</th>
         </tr>
       </thead>
       <tbody>
-        {displayOrders.map((order, index) => {
-          const customer =
-            order.customer_name ||
-            order.customer ||
-            order.name ||
-            "Customer";
-          
-          let itemSummary = "Order";
-          if (order.items && order.items.length > 0) {
-            itemSummary = `${order.items.length} item${order.items.length > 1 ? 's' : ''}`;
-          }
-
-          const amount = formatCurrency(order.total ?? order.amount ?? 0);
-          const status = (order.status || "Unknown").toLowerCase();
-          const rawTime = order.created_at || order.time || "";
-          const isExpanded = expandedId === (order.id || index);
-
+        {rows.map((o, i) => {
+          const id = o.id || i;
+          const open = expanded === id;
+          const status = (o.status || "unknown").toLowerCase();
           return (
-            <React.Fragment key={order.id || index}>
-              <tr 
-                onClick={() => setExpandedId(isExpanded ? null : (order.id || index))}
-                style={{ cursor: "pointer", borderBottom: isExpanded ? "none" : "" }}
-                className="hover-row"
-              >
-                <td className="customer-cell">
-                  <strong>{customer}</strong>
-                  <span>WhatsApp</span>
-                </td>
-                <td>{itemSummary} <span style={{ fontSize: '14px', opacity: 0.6, marginLeft: '4px' }}>{isExpanded ? '▲' : '▼'}</span></td>
+            <React.Fragment key={id}>
+              <tr className="clickable" onClick={() => setExpanded(open ? null : id)}>
                 <td>
-                  <strong>{amount}</strong>
+                  <span className="cell-main">{o.customer_name || o.customer || "Customer"}</span>
+                  <span className="cell-sub">WhatsApp</span>
                 </td>
-                <td>
-                  <span className={`status ${status}`}>{order.status || "Unknown"}</span>
-                </td>
-                <td>{formatTime(rawTime)}</td>
+                <td>{o.items?.length ? `${o.items.length} item${o.items.length > 1 ? "s" : ""}` : "Order"} {open ? "▲" : "▼"}</td>
+                <td><strong>{fmt(o.total ?? o.amount)}</strong></td>
+                <td><span className={`badge badge-${status}`}>{o.status || "Unknown"}</span></td>
+                <td className="dimmed">{fmtTime(o.created_at || o.time)}</td>
               </tr>
-              {isExpanded && (
-                <tr className="expanded-row" style={{ backgroundColor: "rgba(255,255,255,0.03)" }}>
-                  <td colSpan="5" style={{ padding: "16px 24px", paddingTop: 0, borderBottom: "1px solid #333" }}>
-                    <div style={{ marginTop: "12px", marginBottom: "8px", fontWeight: "600", fontSize: "16px", color: "#888", textTransform: "uppercase", letterSpacing: "0.5px" }}>Order Items</div>
-                    <ul style={{ listStyleType: "none", padding: 0, margin: 0 }}>
-                      {order.items && order.items.length > 0 ? (
-                        order.items.map((it, idx) => (
-                          <li key={idx} style={{ padding: "6px 0", borderBottom: idx < order.items.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "18px" }}>
-                             <span>
-                               <span style={{ color: "#aaa", marginRight: "8px" }}>{it.quantity}x</span> {it.product}
-                               {it.batch_id && (
-                                 <a href={`/verify/batch/${it.batch_id}`} target="_blank" rel="noreferrer" style={{ marginLeft: "12px", fontSize: "13px", color: "#38bdf8", textDecoration: "none", background: "rgba(56, 189, 248, 0.1)", padding: "2px 8px", borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                                    Verify Batch
-                                 </a>
-                               )}
-                             </span>
-                             <span style={{ color: "#aaa" }}>{formatCurrency(it.total)}</span>
+              {open && (
+                <tr className="expanded-row">
+                  <td colSpan={5}>
+                    <div className="expanded-inner">
+                      <div className="expanded-header">Order Items</div>
+                      <ul className="item-list">
+                        {(o.items || []).length ? o.items.map((it, j) => (
+                          <li key={j} className="item-row">
+                            <span><span className="dimmed">{it.quantity}×</span> {it.product}
+                              {it.batch_id && (
+                                <a className="verify-link" href={`/verify/batch/${it.batch_id}`} target="_blank" rel="noreferrer">Verify</a>
+                              )}
+                            </span>
+                            <span className="dimmed">{fmt(it.total)}</span>
                           </li>
-                        ))
-                      ) : (
-                        <li style={{ padding: "4px 0", fontSize: "18px", color: "#666" }}>No items found</li>
-                      )}
-                    </ul>
+                        )) : <li className="dimmed">No items found</li>}
+                      </ul>
+                    </div>
                   </td>
                 </tr>
               )}
@@ -707,37 +158,22 @@ function OrdersTable({ orders, full = false }) {
   );
 }
 
+/* ─── payments table ──────────────────────────────── */
 function PaymentsTable({ payments }) {
-  if (!payments || !payments.length) {
-    return <EmptyState text="No payments yet." />;
-  }
+  if (!payments?.length) return <Empty text="No payments yet." />;
   return (
-    <table>
-      <thead>
-        <tr>
-          <th>PAYMENT</th>
-          <th>CUSTOMER</th>
-          <th>AMOUNT</th>
-          <th>METHOD</th>
-          <th>STATUS</th>
-        </tr>
-      </thead>
+    <table className="data-table">
+      <thead><tr><th>Payment ID</th><th>Customer</th><th>Amount</th><th>Method</th><th>Status</th></tr></thead>
       <tbody>
-        {payments.map((payment, index) => {
-          const paymentId = payment.id || payment.payment_id || "—";
-          const customer = payment.customer_name || payment.customer || "—";
-          const amount = formatCurrency(payment.amount);
-          const method = payment.method || payment.payment_method || "—";
-          const status = (payment.status || "Unknown").toLowerCase();
+        {payments.map((p, i) => {
+          const status = (p.status || "unknown").toLowerCase();
           return (
-            <tr key={payment.id || index}>
-              <td>{paymentId}</td>
-              <td>{customer}</td>
-              <td>{amount}</td>
-              <td>{method}</td>
-              <td>
-                <span className={`status ${status}`}>{payment.status || "Unknown"}</span>
-              </td>
+            <tr key={p.id || i}>
+              <td className="mono">{p.id || p.payment_id || "—"}</td>
+              <td>{p.customer_name || p.customer || "—"}</td>
+              <td><strong>{fmt(p.amount)}</strong></td>
+              <td className="dimmed">{p.method || p.payment_method || "—"}</td>
+              <td><span className={`badge badge-${status}`}>{p.status || "Unknown"}</span></td>
             </tr>
           );
         })}
@@ -746,63 +182,31 @@ function PaymentsTable({ payments }) {
   );
 }
 
+/* ─── invoices table ──────────────────────────────── */
 function InvoicesTable({ invoices, onDelete }) {
-  if (!invoices || !invoices.length) {
-    return <EmptyState text="No invoices yet." />;
-  }
+  if (!invoices?.length) return <Empty text="No invoices yet." />;
   return (
-    <table>
-      <thead>
-        <tr>
-          <th>INVOICE</th>
-          <th>CUSTOMER</th>
-          <th>AMOUNT</th>
-          <th>STATUS</th>
-          <th>ACTION</th>
-        </tr>
-      </thead>
+    <table className="data-table">
+      <thead><tr><th>Invoice</th><th>Customer</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
       <tbody>
-        {invoices.map((invoice, index) => {
-          const invoiceId =
-            invoice.invoice_number ||
-            invoice.invoice_id ||
-            invoice.id ||
-            "—";
-          const customer = invoice.customer_name || invoice.customer || "—";
-          const amount = formatCurrency(invoice.total ?? invoice.amount ?? 0);
-          const status = (invoice.status || "Unknown").toLowerCase();
-          const url = invoice.invoice_url || invoice.file_url || invoice.url;
+        {invoices.map((inv, i) => {
+          const status = (inv.status || "unknown").toLowerCase();
+          const url = inv.invoice_url || inv.file_url || inv.url;
           return (
-            <tr key={invoice.id || index}>
+            <tr key={inv.id || i}>
+              <td className="mono">{inv.invoice_number || inv.invoice_id || inv.id || "—"}</td>
+              <td>{inv.customer_name || inv.customer || "—"}</td>
+              <td><strong>{fmt(inv.total ?? inv.amount)}</strong></td>
+              <td><span className={`badge badge-${status}`}>{inv.status || "Unknown"}</span></td>
               <td>
-                <strong>{invoiceId}</strong>
-              </td>
-              <td>{customer}</td>
-              <td>{amount}</td>
-              <td>
-                <span className={`status ${status}`}>{invoice.status || "Unknown"}</span>
-              </td>
-              <td>
-                {status === "pending" ? (
-                  <button
-                    className="icon-btn"
-                    onClick={() => onDelete && onDelete(invoice.id)}
-                    title="Delete"
-                    style={{ color: "#ff4d4f", background: "none", border: "none", cursor: "pointer", fontSize: "20px", marginRight: url ? "8px" : "0" }}
-                  >
-                    🗑️
-                  </button>
-                ) : status === "confirmed" || status === "paid" ? (
-                  <span title="Confirmed" style={{ color: "#52c41a", fontSize: "20px", marginRight: url ? "8px" : "0" }}></span>
-                ) : null}
-                {url ? (
-                  <button
-                    className="ghost-btn"
-                    onClick={() => window.open(url, "_blank", "noopener,noreferrer")}
-                  >
-                    Open PDF
-                  </button>
-                ) : null}
+                <div className="action-row">
+                  {status === "pending" && onDelete && (
+                    <button className="btn-danger-sm" onClick={() => onDelete(inv.id)}>Delete</button>
+                  )}
+                  {url && (
+                    <button className="btn-ghost-sm" onClick={() => window.open(url, "_blank")}>PDF</button>
+                  )}
+                </div>
               </td>
             </tr>
           );
@@ -812,88 +216,331 @@ function InvoicesTable({ invoices, onDelete }) {
   );
 }
 
-function EmptyState({ text }) {
-  return <div className="empty">{text}</div>;
+/* ─── products grid ───────────────────────────────── */
+function ProductGrid({ products, onRemove, saving }) {
+  if (!products.length) return <Empty text="No products in database." />;
+  return (
+    <div className="product-grid">
+      {products.map(p => (
+        <div className="pcard" key={p.id || p.name}>
+          <div className="pcard-img">
+            <span className="pcard-icon">⬡</span>
+          </div>
+          <div className="pcard-body">
+            <span className="pcard-tag">HONEY PRODUCT</span>
+            <h3 className="pcard-name">{p.name}</h3>
+            <p className="pcard-desc">{p.description || "Available through WhatsApp ordering."}</p>
+          </div>
+          <div className="pcard-footer">
+            <strong className="pcard-price">₹{p.price}</strong>
+            <div className="pcard-actions">
+              <span className={"pcard-stock" + (Number(p.stock) > 0 ? "" : " out")}>
+                {Number(p.stock) > 0 ? `${p.stock} in stock` : "Out of stock"}
+              </span>
+              <button className="btn-danger-sm" onClick={() => onRemove(p)} disabled={saving}>Remove</button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ─── page wrapper ────────────────────────────────── */
+function Page({ title, subtitle, children }) {
+  return (
+    <section className="page">
+      <div className="page-header">
+        <div>
+          <h2 className="page-title">{title}</h2>
+          {subtitle && <p className="page-sub">{subtitle}</p>}
+        </div>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+/* ─── main app ────────────────────────────────────── */
+function App() {
+  const [loggedIn, setLoggedIn] = useState(localStorage.getItem("msmeassist_logged_in") === "true");
+  const [email, setEmail] = useState("");
+  const [pass, setPass] = useState("");
+  const [loginErr, setLoginErr] = useState("");
+
+  const [active, setActive] = useState("overview");
+  const [status, setStatus] = useState("Connecting…");
+  const [business, setBusiness] = useState(null);
+  const [summary, setSummary] = useState({});
+  const [orders, setOrders] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [invoices, setInvoices] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [pForm, setPForm] = useState({ name: "", description: "", price: "", stock: "" });
+  const [pSaving, setPSaving] = useState(false);
+  const [pError, setPError] = useState("");
+
+  useEffect(() => {
+    let live = true;
+    async function load() {
+      try {
+        await API.get("/", { timeout: 10000 });
+        if (!live) return;
+        setStatus("Connected");
+        const safeGet = async (url) => { try { const r = await API.get(url, { timeout: 5000 }); return r.data; } catch { return null; } };
+        const [b, pr, sm, or, py, inv] = await Promise.all([
+          safeGet("/business"),
+          safeGet("/products"),
+          safeGet("/dashboard/summary"),
+          safeGet("/dashboard/orders"),
+          safeGet("/dashboard/payments"),
+          safeGet("/dashboard/invoices"),
+        ]);
+        if (!live) return;
+        if (b) setBusiness(b);
+        setProducts(pr || []);
+        setSummary(sm?.summary || sm || {});
+        setOrders(or?.orders || or || []);
+        setPayments(py?.payments || py || []);
+        setInvoices(inv?.invoices || inv || []);
+      } catch (e) {
+        if (live) setStatus(e.code === "ERR_NETWORK" ? "Network error" : `Error ${e.response?.status || ""}`);
+      }
+    }
+    load();
+    return () => { live = false; };
+  }, []);
+
+  function login(e) {
+    e.preventDefault();
+    if (email === "admin@apis.ai" && pass === "apisai") {
+      localStorage.setItem("msmeassist_logged_in", "true");
+      setLoggedIn(true);
+    } else {
+      setLoginErr("Invalid email or password");
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem("msmeassist_logged_in");
+    setLoggedIn(false);
+  }
+
+  async function deleteInvoice(id) {
+    if (!window.confirm("Delete this order/invoice?")) return;
+    try {
+      await API.delete(`/orders/${id}`);
+      setInvoices(prev => prev.filter(i => i.id !== id));
+      setOrders(prev => prev.filter(o => o.id !== id));
+      setPayments(prev => prev.filter(p => p.id !== id));
+    } catch { alert("Failed to delete."); }
+  }
+
+  async function addProduct(e) {
+    e.preventDefault();
+    setPError("");
+    const { name, description, price, stock } = pForm;
+    if (!name.trim() || price === "" || stock === "") { setPError("Name, price and stock are required."); return; }
+    try {
+      setPSaving(true);
+      await API.post("/products", { name: name.trim(), description: description.trim(), price: Number(price), stock: Number(stock) }, { timeout: 15000 });
+      setPForm({ name: "", description: "", price: "", stock: "" });
+      const r = await API.get("/products", { timeout: 10000 });
+      setProducts(r.data || []);
+    } catch (err) {
+      const d = err.response?.data;
+      setPError(Array.isArray(d?.detail) ? d.detail.map(x => x.msg).join(", ") : d?.detail || d?.message || err.message || "Failed to add.");
+    } finally { setPSaving(false); }
+  }
+
+  async function removeProduct(p) {
+    if (!p.id || !window.confirm(`Remove "${p.name}"?`)) return;
+    try {
+      setPSaving(true);
+      await API.delete(`/products/${p.id}`);
+      const r = await API.get("/products", { timeout: 10000 });
+      setProducts(r.data || []);
+    } catch (err) { setPError(err.response?.data?.detail || "Could not remove."); }
+    finally { setPSaving(false); }
+  }
+
+  /* verify route */
+  const m = window.location.pathname.match(/^\/verify\/batch\/([A-Za-z0-9-]+)/);
+  if (m) return <VerifyBatch batchId={m[1]} />;
+
+  /* login screen */
+  if (!loggedIn) return (
+    <div className="login-screen">
+      <div className="login-card">
+        <div className="login-logo">APIS AI</div>
+        <p className="login-tagline">AI-Powered Smart Beekeeping &amp; Honey Traceability</p>
+        <form onSubmit={login}>
+          <label className="field-label">Email</label>
+          <input className="field-input" type="email" placeholder="admin@apis.ai" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" />
+          <label className="field-label">Password</label>
+          <input className="field-input" type="password" placeholder="••••••••" value={pass} onChange={e => setPass(e.target.value)} autoComplete="current-password" />
+          {loginErr && <div className="login-err">{loginErr}</div>}
+          <button className="login-btn" type="submit">Sign in →</button>
+        </form>
+        <p className="login-footer">AI-powered apiary automation</p>
+      </div>
+    </div>
+  );
+
+  const pageTitle = NAV.find(n => n.id === active)?.label || "Overview";
+
+  return (
+    <div className="shell">
+      {/* ── SIDEBAR ── */}
+      <aside className="sidebar">
+        <div className="brand">
+          <div className="brand-icon">A</div>
+          <div>
+            <div className="brand-name">APIS AI</div>
+            <div className="brand-sub">Smart Apiary Platform</div>
+          </div>
+        </div>
+
+        <div className="nav-section-label">Workspace</div>
+        <nav>
+          {NAV.map(n => (
+            <button key={n.id} className={"nav-btn" + (active === n.id ? " active" : "")} onClick={() => setActive(n.id)}>
+              <span className="nav-ico">{n.icon}</span>
+              {n.label}
+            </button>
+          ))}
+        </nav>
+
+        <div className="sidebar-foot">
+          <div className="ai-pill">
+            <span className="pulse-dot" />
+            <div>
+              <div className="ai-pill-title">AI Assistant</div>
+              <div className="ai-pill-sub">WhatsApp automation active</div>
+            </div>
+          </div>
+          <button className="foot-btn" onClick={() => alert("Settings coming soon")}>⚙ Settings</button>
+          <button className="foot-btn danger" onClick={logout}>↩ Sign out</button>
+        </div>
+      </aside>
+
+      {/* ── MAIN ── */}
+      <main className="main">
+        <header className="topbar">
+          <div>
+            <div className="topbar-eye">APIARY DASHBOARD</div>
+            <h1 className="topbar-title">{pageTitle}</h1>
+          </div>
+          <div className={"status-pill" + (status === "Connected" ? " ok" : "")}>
+            <span className="status-dot" />
+            {status}
+          </div>
+        </header>
+
+        {/* OVERVIEW */}
+        {active === "overview" && (
+          <Page title={business?.name || "Golden Hive Honey Farm"} subtitle="Here's what is happening with your apiary today.">
+            <div className="overview-cta">
+              <button className="btn-primary" onClick={() => setActive("orders")}>View Orders →</button>
+            </div>
+
+            <div className="stats-row">
+              <StatCard label="Today's Revenue" value={fmt(summary.today_revenue)} />
+              <StatCard label="Orders Today" value={summary.today_orders ?? 0} />
+              <StatCard label="Pending Payments" value={summary.pending_payments ?? 0} sub="Needs attention" warn />
+              <StatCard label="Products" value={summary.total_products ?? products.length ?? 0} />
+            </div>
+
+            <div className="two-col">
+              <div className="panel">
+                <div className="panel-hd"><span className="panel-title">Revenue</span><span className="panel-sub">Last 7 days</span></div>
+                <BarChart data={summary.revenue_last_7_days} />
+              </div>
+              <div className="panel">
+                <div className="panel-hd"><span className="panel-title">AI Activity</span><span className="live-badge">LIVE</span></div>
+                <ActivityList orders={orders} payments={payments} invoices={invoices} />
+              </div>
+            </div>
+
+            <div className="panel">
+              <div className="panel-hd">
+                <span className="panel-title">Recent Orders</span>
+                <button className="btn-ghost" onClick={() => setActive("orders")}>View all →</button>
+              </div>
+              <OrdersTable orders={orders} />
+            </div>
+          </Page>
+        )}
+
+        {/* ORDERS */}
+        {active === "orders" && (
+          <Page title="Orders" subtitle="Track WhatsApp orders from conversation to payment.">
+            <div className="panel"><OrdersTable orders={orders} full /></div>
+          </Page>
+        )}
+
+        {/* PAYMENTS */}
+        {active === "payments" && (
+          <Page title="Payments" subtitle="Monitor payments collected through ApisAI.">
+            <div className="stats-row">
+              <StatCard label="Collected This Month" value={fmt(summary.month_revenue ?? summary.collected_amount)} />
+              <StatCard label="Pending Amount" value={fmt(summary.pending_amount)} warn />
+              <StatCard label="Success Rate" value={summary.payment_success_rate !== undefined ? `${Number(summary.payment_success_rate).toFixed(1)}%` : "0%"} />
+            </div>
+            <div className="panel"><PaymentsTable payments={payments} /></div>
+          </Page>
+        )}
+
+        {/* INVOICES */}
+        {active === "invoices" && (
+          <Page title="Invoices" subtitle="Invoices generated automatically after successful payment.">
+            <div className="panel"><InvoicesTable invoices={invoices} onDelete={deleteInvoice} /></div>
+          </Page>
+        )}
+
+        {/* PRODUCTS */}
+        {active === "products" && (
+          <Page title="Inventory" subtitle="Add or remove products from your Supabase database.">
+            <div className="panel">
+              <div className="panel-hd"><span className="panel-title">Add Product</span></div>
+              <form className="product-form" onSubmit={addProduct}>
+                <div className="form-row">
+                  <div className="form-field">
+                    <label className="field-label">Name</label>
+                    <input className="field-input" value={pForm.name} onChange={e => setPForm({ ...pForm, name: e.target.value })} placeholder="Product name" />
+                  </div>
+                  <div className="form-field">
+                    <label className="field-label">Description</label>
+                    <input className="field-input" value={pForm.description} onChange={e => setPForm({ ...pForm, description: e.target.value })} placeholder="Short description" />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-field">
+                    <label className="field-label">Price (₹)</label>
+                    <input className="field-input" type="number" min="0" step="0.01" value={pForm.price} onChange={e => setPForm({ ...pForm, price: e.target.value })} placeholder="0.00" />
+                  </div>
+                  <div className="form-field">
+                    <label className="field-label">Stock</label>
+                    <input className="field-input" type="number" min="0" value={pForm.stock} onChange={e => setPForm({ ...pForm, stock: e.target.value })} placeholder="0" />
+                  </div>
+                </div>
+                {pError && <div className="form-err">{pError}</div>}
+                <button className="btn-primary" type="submit" disabled={pSaving}>{pSaving ? "Saving…" : "Add Product"}</button>
+              </form>
+            </div>
+            <ProductGrid products={products} onRemove={removeProduct} saving={pSaving} />
+          </Page>
+        )}
+
+        {/* HONEYCHAIN SUBSYSTEMS */}
+        {["hives", "harvests", "batches"].includes(active) && (
+          <Page title="ApisAI Subsystem" subtitle="Blockchain-based traceability and smart beekeeping management.">
+            <HoneyChain activeSection={active} />
+          </Page>
+        )}
+      </main>
+    </div>
+  );
 }
 
 export default App;
-function ActivityList({ orders, payments, invoices }) {
-  // Gather all activities from orders, payments, invoices with timestamps and amounts
-  const activities = [];
-  if (Array.isArray(orders)) {
-    for (const order of orders) {
-      const ts = order.created_at || order.time;
-      if (ts) {
-        activities.push({
-          type: "order",
-          title: "Order received",
-          detail:
-            (order.quantity ? `${order.quantity} × ` : "") +
-            (order.item_name || order.product_name || order.item || "Order"),
-          amount: order.total ?? order.amount ?? 0,
-          time: ts,
-        });
-      }
-    }
-  }
-  if (Array.isArray(payments)) {
-    for (const payment of payments) {
-      const ts = payment.created_at || payment.time;
-      if (ts) {
-        activities.push({
-          type: "payment",
-          title: "Payment collected",
-          detail:
-            formatCurrency(payment.amount) +
-            (payment.method || payment.payment_method
-              ? ` • ${payment.method || payment.payment_method}`
-              : ""),
-          amount: payment.amount || 0,
-          time: ts,
-        });
-      }
-    }
-  }
-  if (Array.isArray(invoices)) {
-    for (const invoice of invoices) {
-      const ts = invoice.created_at || invoice.time;
-      if (ts) {
-        activities.push({
-          type: "invoice",
-          title: "Invoice delivered",
-          detail: (invoice.invoice_number ||
-            invoice.invoice_id ||
-            invoice.id ||
-            "Invoice") +
-            (invoice.invoice_url || invoice.file_url || invoice.url
-              ? " • WhatsApp PDF"
-              : ""),
-          amount: invoice.total ?? invoice.amount ?? 0,
-          time: ts,
-        });
-      }
-    }
-  }
-  // Sort by time descending
-  activities.sort((a, b) => {
-    const ta = new Date(a.time).getTime();
-    const tb = new Date(b.time).getTime();
-    return tb - ta;
-  });
-  const latest = activities.slice(0, 5);
-  if (!latest.length) {
-    return <EmptyState text="No activity yet." />;
-  }
-  return (
-    <>
-      {latest.map((activity, idx) => (
-        <Activity
-          key={idx}
-          title={activity.title}
-          detail={activity.detail}
-          time={formatTime(activity.time)}
-        />
-      ))}
-    </>
-  );
-}
