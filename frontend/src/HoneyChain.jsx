@@ -126,17 +126,17 @@ export default function HoneyChain({ activeSection = "overview" }) {
           </div>
           <div className="stats-grid">
             <div className="stat-card">
-              <div className="stat-icon" style={{ background: "rgba(217, 119, 6, 0.1)", color: "#d97706" }}>🐝</div>
+              <div className="stat-icon" style={{ background: "rgba(217, 119, 6, 0.1)", color: "#d97706" }}></div>
               <div className="stat-label">Active Hives</div>
               <div className="stat-value">{hives.length}</div>
             </div>
             <div className="stat-card">
-              <div className="stat-icon" style={{ background: "rgba(217, 119, 6, 0.1)", color: "#d97706" }}>🍯</div>
+              <div className="stat-icon" style={{ background: "rgba(217, 119, 6, 0.1)", color: "#d97706" }}></div>
               <div className="stat-label">Total Harvests</div>
               <div className="stat-value">{harvests.length}</div>
             </div>
             <div className="stat-card">
-              <div className="stat-icon" style={{ background: "rgba(217, 119, 6, 0.1)", color: "#d97706" }}>📦</div>
+              <div className="stat-icon" style={{ background: "rgba(217, 119, 6, 0.1)", color: "#d97706" }}></div>
               <div className="stat-label">Traceable Batches</div>
               <div className="stat-value">{batches.length}</div>
             </div>
@@ -176,7 +176,7 @@ export default function HoneyChain({ activeSection = "overview" }) {
                 
                 {insights[hive.id] && (
                   <div style={{ marginTop: "4px", background: "rgba(168,85,247,0.05)", padding: "12px", borderRadius: "8px", border: "1px solid rgba(168,85,247,0.2)", fontSize: "13px" }}>
-                    <strong style={{ color: "#c084fc", display: "block", marginBottom: "4px" }}>🤖 AI Insight ({insights[hive.id].risk_level} Risk)</strong> 
+                    <strong style={{ color: "#c084fc", display: "block", marginBottom: "4px" }}> AI Insight ({insights[hive.id].risk_level} Risk)</strong> 
                     <span style={{ color: "#4f4a47", display: "block", marginBottom: "6px" }}>{insights[hive.id].health_summary}</span>
                     <em style={{ color: "#6b635e" }}>Action: {insights[hive.id].recommended_action}</em>
                   </div>

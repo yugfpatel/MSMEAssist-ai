@@ -5,10 +5,10 @@ import VerifyBatch from "./VerifyBatch";
 
 const navItems = [
   { id: "overview", label: "Overview", icon: "⌂" },
-  { id: "hives", label: "Hives & IoT", icon: "🐝" },
-  { id: "harvests", label: "Harvests", icon: "🍯" },
+  { id: "hives", label: "Hives & IoT", icon: "" },
+  { id: "harvests", label: "Harvests", icon: "" },
   { id: "batches", label: "Traceability", icon: "🔗" },
-  { id: "products", label: "Inventory", icon: "📦" },
+  { id: "products", label: "Inventory", icon: "" },
   { id: "orders", label: "Orders", icon: "🛒" },
   { id: "payments", label: "Payments", icon: "₹" },
   { id: "invoices", label: "Invoices", icon: "▤" },
@@ -260,8 +260,8 @@ function App() {
     return (
       <div className="login-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#faf9f6', fontFamily: 'sans-serif' }}>
         <form onSubmit={handleLogin} className="login-form panel" style={{ margin: 'auto', width: '100%', maxWidth: '400px', padding: '32px', background: '#f3f1e9', border: '1px solid #222', borderRadius: '12px' }}>
-          <div style={{ textAlign: "center", fontSize: "40px", marginBottom: "10px" }}>🐝</div>
-          <h2 style={{ textAlign: 'center', marginBottom: '8px', color: '#d97706', fontSize: '28px' }}>ApisAI</h2>
+          <div style={{ textAlign: "center", fontSize: "40px", marginBottom: "10px" }}></div>
+          <h2 style={{ textAlign: 'center', marginBottom: '8px', color: '#d97706', fontSize: '28px' }}>APIS AI</h2>
           <p style={{ textAlign: 'center', color: '#888', marginBottom: '24px', fontSize: '15px' }}>AI-Powered Smart Beekeeping & Honey Traceability</p>
           
           <label style={{ display: 'block', marginBottom: '8px', color: '#ccc', fontSize: '18px' }}>Email</label>
@@ -295,9 +295,9 @@ function App() {
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-mark" style={{ background: "rgba(217, 119, 6, 0.1)", border: "1px solid rgba(217, 119, 6, 0.2)" }}>🐝</div>
+          <div className="brand-mark" style={{ background: "rgba(217, 119, 6, 0.1)", border: "1px solid rgba(217, 119, 6, 0.2)" }}></div>
           <div>
-            <strong style={{ color: "#d97706" }}>ApisAI</strong>
+            <strong style={{ color: "#d97706" }}>APIS AI</strong>
             <span>Smart Apiary Platform</span>
           </div>
         </div>
@@ -324,7 +324,7 @@ function App() {
               <span>WhatsApp automation active</span>
             </div>
           </div>
-          <button className="settings-btn" onClick={() => alert("Settings coming next 🚀")}>⚙ Settings</button>
+          <button className="settings-btn" onClick={() => alert("Settings coming next ")}>⚙ Settings</button>
           <button className="settings-btn" onClick={handleLogout} style={{ marginTop: '8px', color: '#ff4d4f' }}>🚪 Logout</button>
         </div>
       </aside>
@@ -378,7 +378,7 @@ function App() {
                 label="Products"
                 value={summary.total_products ?? totalProducts ?? 0}
                 change=""
-                icon="📦"
+                icon=""
               />
             </div>
 
@@ -539,7 +539,7 @@ function App() {
             <div className="product-grid">
               {products.length ? products.map((product) => (
                 <div className="product-card" key={product.id || product.name}>
-                  <div className="product-image">🍯</div>
+                  <div className="product-image"></div>
                   <div className="product-info">
                     <span className="product-category">HONEY PRODUCT</span>
                     <h3>{product.name}</h3>
@@ -799,7 +799,7 @@ function OrdersTable({ orders, full = false }) {
                                <span style={{ color: "#aaa", marginRight: "8px" }}>{it.quantity}x</span> {it.product}
                                {it.batch_id && (
                                  <a href={`/verify/batch/${it.batch_id}`} target="_blank" rel="noreferrer" style={{ marginLeft: "12px", fontSize: "13px", color: "#d97706", textDecoration: "none", background: "rgba(217, 119, 6, 0.1)", padding: "2px 8px", borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                                   🐝 Verify Batch
+                                    Verify Batch
                                  </a>
                                )}
                              </span>
@@ -907,7 +907,7 @@ function InvoicesTable({ invoices, onDelete }) {
                     🗑️
                   </button>
                 ) : status === "confirmed" || status === "paid" ? (
-                  <span title="Confirmed" style={{ color: "#52c41a", fontSize: "20px", marginRight: url ? "8px" : "0" }}>✅</span>
+                  <span title="Confirmed" style={{ color: "#52c41a", fontSize: "20px", marginRight: url ? "8px" : "0" }}></span>
                 ) : null}
                 {url ? (
                   <button
