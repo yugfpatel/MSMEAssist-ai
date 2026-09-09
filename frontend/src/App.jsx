@@ -258,28 +258,28 @@ function App() {
 
   if (!isLoggedIn) {
     return (
-      <div className="login-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#faf9f6', fontFamily: 'sans-serif' }}>
-        <form onSubmit={handleLogin} className="login-form panel" style={{ margin: 'auto', width: '100%', maxWidth: '400px', padding: '32px', background: '#f3f1e9', border: '1px solid #222', borderRadius: '12px' }}>
+      <div className="login-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#09090b', fontFamily: 'sans-serif' }}>
+        <form onSubmit={handleLogin} className="login-form panel" style={{ margin: 'auto', width: '100%', maxWidth: '400px', padding: '32px', background: '#18181b', border: '1px solid #27272a', borderRadius: '12px' }}>
           <div style={{ textAlign: "center", fontSize: "40px", marginBottom: "10px" }}></div>
-          <h2 style={{ textAlign: 'center', marginBottom: '8px', color: '#d97706', fontSize: '28px' }}>APIS AI</h2>
-          <p style={{ textAlign: 'center', color: '#888', marginBottom: '24px', fontSize: '15px' }}>AI-Powered Smart Beekeeping & Honey Traceability</p>
+          <h2 style={{ textAlign: 'center', marginBottom: '8px', color: '#fafafa', fontSize: '28px' }}>APIS AI</h2>
+          <p style={{ textAlign: 'center', color: '#a1a1aa', marginBottom: '24px', fontSize: '15px' }}>AI-Powered Smart Beekeeping & Honey Traceability</p>
           
-          <label style={{ display: 'block', marginBottom: '8px', color: '#ccc', fontSize: '18px' }}>Email</label>
+          <label style={{ display: 'block', marginBottom: '8px', color: '#a1a1aa', fontSize: '18px' }}>Email</label>
           <input 
             type="email" 
             placeholder="admin@apis.ai" 
             value={loginEmail} 
             onChange={e => setLoginEmail(e.target.value)}
-            style={{ width: '100%', marginBottom: '16px', padding: '12px', background: '#faf9f6', border: '1px solid #333', borderRadius: '8px', color: '#0f172a', boxSizing: 'border-box' }}
+            style={{ width: '100%', marginBottom: '16px', padding: '12px', background: '#09090b', border: '1px solid #333', borderRadius: '8px', color: '#f4f4f5', boxSizing: 'border-box' }}
           />
           
-          <label style={{ display: 'block', marginBottom: '8px', color: '#ccc', fontSize: '18px' }}>Password</label>
+          <label style={{ display: 'block', marginBottom: '8px', color: '#a1a1aa', fontSize: '18px' }}>Password</label>
           <input 
             type="password" 
             placeholder="••••••••" 
             value={loginPassword} 
             onChange={e => setLoginPassword(e.target.value)}
-            style={{ width: '100%', marginBottom: '24px', padding: '12px', background: '#faf9f6', border: '1px solid #333', borderRadius: '8px', color: '#0f172a', boxSizing: 'border-box' }}
+            style={{ width: '100%', marginBottom: '24px', padding: '12px', background: '#09090b', border: '1px solid #333', borderRadius: '8px', color: '#f4f4f5', boxSizing: 'border-box' }}
           />
           
           {loginError && <div style={{ color: '#ff4d4f', marginBottom: '16px', textAlign: 'center', fontSize: '18px', background: 'rgba(255,77,79,0.1)', padding: '8px', borderRadius: '6px' }}>{loginError}</div>}
@@ -579,120 +579,6 @@ function App() {
         )}
       </main>
 
-      <style>{`
-* { box-sizing: border-box; }
-body { margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background-color: #faf9f6; background-image: radial-gradient(rgba(217, 119, 6, 0.04) 2px, transparent 2px); background-size: 32px 32px; color: #2d2724; }
-button { font: inherit; }
-.app-shell { min-height: 100vh; display: flex; background-color: #faf9f6; background-image: radial-gradient(rgba(217, 119, 6, 0.04) 2px, transparent 2px); background-size: 32px 32px; color: #2d2724; }
-.sidebar { width: 250px; background: #f3f1e9; color: #2d2724; padding: 24px 16px; display: flex; flex-direction: column; position: fixed; inset: 0 auto 0 0; border-right: 1px solid #e5e0d8; }
-.brand { display: flex; align-items: center; gap: 11px; padding: 4px 10px 30px; }
-.brand-mark { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; font-weight: 900; font-size: 24px; }
-.brand strong { display: block; font-size: 20px; letter-spacing: -.3px; color: #d97706; }
-.brand span { display: block; color: #6b635e; font-size: 15px; margin-top: 2px; }
-.sidebar-label { color: #9ca3af; font-size: 14px; font-weight: 800; letter-spacing: 1.2px; padding: 0 12px 9px; }
-nav { display: grid; gap: 5px; }
-.nav-item { border: 0; color: #6b635e; background: transparent; width: 100%; padding: 11px 12px; border-radius: 9px; display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer; font-size: 17px; font-weight: 600; }
-.nav-item:hover { background: #f7f5ef; color: #2d2724; }
-.nav-item.active { background: rgba(217, 119, 6, 0.15); color: #d97706; border: 1px solid rgba(217, 119, 6, 0.2); }
-.nav-icon { width: 20px; text-align: center; font-size: 19px; }
-.sidebar-bottom { margin-top: auto; }
-.ai-card { border: 1px solid #e5e0d8; border-radius: 12px; padding: 13px; display: flex; gap: 10px; margin-bottom: 10px; background: #ffffff; }
-.ai-dot { width: 8px; height: 8px; background: #45d483; border-radius: 50%; margin-top: 5px; box-shadow: 0 0 0 4px rgba(69,212,131,.1); }
-.ai-card strong, .ai-card span { display: block; }
-.ai-card strong { font-size: 16px; color: #2d2724; }
-.ai-card span { color: #6b635e; font-size: 14px; margin-top: 3px; }
-.settings-btn { background: transparent; border: 0; color: #6b635e; padding: 10px 12px; cursor: pointer; font-size: 16px; }
-.main-content { margin-left: 250px; width: calc(100% - 250px); padding: 0 38px 50px; }
-.topbar { height: 96px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e0d8; margin-bottom: 30px; }
-.eyebrow { color: #d97706; font-size: 13px; font-weight: 800; letter-spacing: 1.5px; }
-h1, h2, h3 { color: #2d2724; }
-h1 { margin: 4px 0 0; font-size: 29px; letter-spacing: -.7px; }
-h2 { margin: 0; font-size: 25px; letter-spacing: -.5px; }
-h3 { margin: 0; font-size: 18px; letter-spacing: -.2px; }
-p { color: #4f4a47; font-size: 16px; line-height: 1.6; margin: 6px 0 0; }
-.topbar-right { display: flex; align-items: center; gap: 15px; }
-.connection-pill { background: #ffffff; border: 1px solid #e5e0d8; border-radius: 30px; padding: 8px 12px; font-size: 15px; color: #4f4a47; }
-.status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #b45309; margin-right: 6px; }
-.status-dot.online { background: #35bd75; }
-.avatar { width: 34px; height: 34px; border-radius: 50%; background: #d97706; color: #fff; display: grid; place-items: center; font-size: 16px; font-weight: 700; }
-.welcome-row, .page-intro { margin-bottom: 24px; }
-.welcome-row { display: flex; justify-content: space-between; align-items: end; }
-.primary-btn { background: #d97706; color: #fff; border: 0; padding: 10px 15px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; }
-.primary-btn:hover { transform: translateY(-1px); background: #d97706; }
-.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 18px; }
-.stat-card, .panel, .product-card { background: #ffffff; border: 1px solid #e5e0d8; border-radius: 12px; }
-.stat-card { padding: 17px; position: relative; }
-.stat-icon { position: absolute; right: 15px; top: 15px; width: 30px; height: 30px; border-radius: 8px; background: rgba(217, 119, 6, 0.1); display: grid; place-items: center; font-size: 17px; color: #d97706; }
-.stat-label { color: #5d5652; font-size: 14px; font-weight: 600; }
-.stat-value { color: #2d2724; font-size: 27px; font-weight: 800; margin-top: 8px; letter-spacing: -.7px; }
-.stat-change { margin-top: 6px; color: #45d483; font-size: 13px; font-weight: 700; }
-.stat-change.warning { color: #b45309; }
-.dashboard-grid { display: grid; grid-template-columns: 1.65fr 1fr; gap: 18px; margin-bottom: 18px; }
-.panel { padding: 20px; }
-.panel-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-.panel-heading span { color: #5d5652; font-size: 14px; }
-.ghost-btn { border: 1px solid #d1ccc5; background: #f7f5ef; border-radius: 7px; padding: 7px 10px; color: #4f4a47; font-size: 14px; cursor: pointer; }
-.ghost-btn:hover { background: #e5e0d8; }
-.live-badge { color: #45d483 !important; background: #10261b; border-radius: 20px; padding: 4px 7px; font-weight: 800; font-size: 12px !important; }
-.chart { height: 220px; display: flex; align-items: end; justify-content: space-around; gap: 12px; border-bottom: 1px solid #e5e0d8; padding: 10px 12px 0; }
-.chart-col { height: 100%; flex: 1; display: flex; flex-direction: column; justify-content: end; align-items: center; gap: 8px; }
-.bar { width: min(32px, 65%); background: #d97706; border-radius: 5px 5px 0 0; min-height: 12px; }
-.chart-col span { font-size: 13px; color: #5d5652; padding-bottom: 8px; }
-.activity-list { display: grid; }
-.activity { padding: 13px 0; border-bottom: 1px solid #e5e0d8; display: flex; justify-content: space-between; gap: 10px; }
-.activity:last-child { border-bottom: 0; }
-.activity strong, .activity span { display: block; }
-.activity strong { font-size: 14px; color: #2d2724; }
-.activity span { font-size: 13px; color: #6b635e; margin-top: 3px; }
-.activity time { font-size: 13px; color: #9ca3af; white-space: nowrap; }
-.table-panel { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-table { width: 100%; border-collapse: collapse; }
-th { text-align: left; color: #6b635e; font-size: 13px; font-weight: 700; padding: 10px 8px; border-bottom: 1px solid #d1ccc5; }
-td { padding: 13px 8px; border-bottom: 1px solid #e5e0d8; font-size: 14px; color: #4f4a47; }
-.customer-cell strong { display: block; font-size: 14px; color: #2d2724; }
-.customer-cell span { color: #6b635e; font-size: 13px; }
-.status { display: inline-block; border-radius: 20px; padding: 5px 8px; font-size: 12px; font-weight: 800; }
-.status.paid { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-.status.pending { background: rgba(217, 119, 6, 0.1); color: #d97706; }
-.status.completed { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
-.product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-.product-card { overflow: hidden; }
-.product-image { height: 130px; display: grid; place-items: center; font-size: 46px; background: #f7f5ef; }
-.product-info { padding: 16px; }
-.product-category { font-size: 12px; font-weight: 800; color: #6b635e; letter-spacing: 1px; }
-.product-info h3 { margin-top: 5px; color: #2d2724; }
-.product-info p { color: #5d5652; }
-.product-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
-.product-manager { margin-bottom: 18px; }
-.product-form { display: grid; grid-template-columns: 1.2fr 1.5fr .8fr 1fr auto; gap: 10px; align-items: center; }
-.product-form input { width: 100%; border: 1px solid #d1ccc5; border-radius: 8px; padding: 10px 11px; font-size: 15px; outline: none; background: #f3f1e9; color: #2d2724 !important; -webkit-text-fill-color: #2d2724 !important; }
-.product-form input::placeholder { color: #6b635e !important; -webkit-text-fill-color: #6b635e !important; opacity: 1 !important; }
-.product-form input:focus { border-color: #d97706; }
-.product-form button:disabled, .delete-btn:disabled { opacity: .55; cursor: not-allowed; }
-.product-error { margin-top: 10px; color: #ff8d8d; background: #2b1517; border: 1px solid #54282b; border-radius: 8px; padding: 9px 11px; font-size: 14px; }
-.product-actions { display: flex; align-items: center; gap: 10px; }
-.delete-btn { border: 1px solid #54282b; background: #241315; color: #ff8d8d; border-radius: 7px; padding: 6px 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
-.product-footer strong { font-size: 21px; color: #2d2724; }
-.stock { font-size: 13px; color: #10b981; font-weight: 700; }
-.stock.low { color: #d97706; }
-.page-intro h2 { margin-bottom: 3px; }
-.empty { padding: 50px; text-align: center; color: #6b635e; font-size: 16px; }
-@media (max-width: 1000px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .dashboard-grid { grid-template-columns: 1fr; } .product-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 700px) {
-  .sidebar { width: 70px; padding: 20px 8px; }
-  .brand div:last-child, .sidebar-label, .ai-card div { display: none; }
-  .brand { justify-content: center; padding: 4px 0 25px; }
-  .nav-item { justify-content: center; font-size: 0; padding: 11px 0; }
-  .settings-btn { font-size: 0; padding: 10px 0; }
-  .settings-btn::before { content: '⚙'; font-size: 18px; }
-  .settings-btn[style*="color: #ff4d4f"]::before { content: '🚪'; }
-  .main-content { margin-left: 70px; width: calc(100% - 70px); padding: 0 16px 30px; }
-  .stats-grid, .product-grid { grid-template-columns: 1fr; }
-  .welcome-row { align-items: start; gap: 15px; flex-direction: column; }
-  .product-form { grid-template-columns: 1fr; }
-  .topbar { flex-direction: column; align-items: flex-start; justify-content: center; gap: 12px; height: auto; padding: 15px 0; }
-}
-      `}</style>
     </div>
   );
 }

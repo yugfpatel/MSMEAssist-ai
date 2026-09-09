@@ -1,19 +1,19 @@
-/* ENTERPRISE DASHBOARD REDESIGN - AGRI-TECH EMERALD */
+/* ENTERPRISE DASHBOARD REDESIGN - SLEEK DARK MODE */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg-app: #f8fafc;
-  --bg-panel: #ffffff;
-  --bg-sidebar: #ffffff;
-  --border-light: #e2e8f0;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --primary: #059669;
-  --primary-hover: #047857;
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --bg-app: #09090b;
+  --bg-panel: #18181b;
+  --bg-sidebar: #09090b;
+  --border-light: #27272a;
+  --text-main: #f4f4f5;
+  --text-muted: #a1a1aa;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
 }
 
 * {
@@ -22,16 +22,17 @@
 
 body {
   margin: 0;
-  font-family: 'Inter', -apple-system, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--bg-app);
   color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3, h4 {
-  font-family: 'Playfair Display', serif;
-  color: #0f172a;
+  color: #fafafa;
   margin-top: 0;
-  letter-spacing: -0.5px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .app-shell {
@@ -42,30 +43,28 @@ h1, h2, h3, h4 {
 
 /* SIDEBAR */
 .sidebar {
-  width: 250px;
+  width: 260px;
   background: var(--bg-sidebar);
   border-right: 1px solid var(--border-light);
   display: flex;
   flex-direction: column;
-  padding: 20px 0;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.02);
+  padding: 24px 0;
 }
 
 .brand {
   padding: 0 24px;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
 }
 
 .brand h1 {
-  font-size: 20px;
-  color: var(--primary);
+  font-size: 22px;
+  color: var(--text-main);
   margin: 0;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  letter-spacing: -0.5px;
 }
 
 .sidebar-label {
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
   color: var(--text-muted);
   letter-spacing: 1px;
@@ -77,24 +76,24 @@ h1, h2, h3, h4 {
 .nav-item {
   display: flex;
   align-items: center;
-  padding: 12px 24px;
+  padding: 10px 24px;
+  margin: 4px 12px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   color: var(--text-muted);
   font-size: 14px;
   font-weight: 500;
   transition: all 0.2s ease;
-  border-left: 3px solid transparent;
 }
 
 .nav-item:hover {
-  background: #f1f5f9;
-  color: var(--primary);
+  background: #27272a;
+  color: var(--text-main);
 }
 
 .nav-item.active {
-  background: #ecfdf5;
-  color: var(--primary);
-  border-left-color: var(--primary);
+  background: #27272a;
+  color: #fafafa;
   font-weight: 600;
 }
 
@@ -117,9 +116,9 @@ h1, h2, h3, h4 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 40px;
+  padding: 24px 40px;
   border-bottom: 1px solid var(--border-light);
-  background: var(--bg-panel);
+  background: var(--bg-app);
 }
 
 .topbar h1 {
@@ -128,20 +127,19 @@ h1, h2, h3, h4 {
 }
 
 .eyebrow {
-  font-family: 'Inter', sans-serif;
   font-size: 12px;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 2px;
-  margin-bottom: 4px;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  font-weight: 600;
 }
 
 /* PANELS */
 .panel {
   background: var(--bg-panel);
   border: 1px solid var(--border-light);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-md);
   padding: 24px;
   margin: 20px 40px;
 }
@@ -150,49 +148,45 @@ h1, h2, h3, h4 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  border-bottom: 1px solid var(--border-light);
-  padding-bottom: 10px;
+  margin-bottom: 24px;
 }
 
 .panel-heading h3 {
   margin: 0;
   font-size: 16px;
-  font-family: 'Inter', sans-serif;
-  font-weight: 600;
 }
 
 /* BUTTONS */
 button {
   font-family: 'Inter', sans-serif;
   border-radius: var(--radius-sm);
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   border: none;
 }
 
 .primary-btn {
-  background: var(--primary);
-  color: white;
+  background: var(--text-main);
+  color: var(--bg-app);
   padding: 10px 16px;
-  font-size: 13px;
-  letter-spacing: 0.5px;
+  font-size: 14px;
 }
 
 .primary-btn:hover {
-  background: var(--primary-hover);
+  background: #d4d4d8;
 }
 
 .ghost-btn {
   background: transparent;
   color: var(--text-muted);
   border: 1px solid var(--border-light);
-  padding: 8px 12px;
+  padding: 8px 16px;
+  font-size: 13px;
 }
 
 .ghost-btn:hover {
-  background: #f1f5f9;
+  background: #27272a;
   color: var(--text-main);
 }
 
@@ -208,18 +202,19 @@ th {
   font-size: 12px;
   text-transform: uppercase;
   color: var(--text-muted);
-  border-bottom: 2px solid var(--border-light);
-  letter-spacing: 1px;
+  border-bottom: 1px solid var(--border-light);
+  font-weight: 600;
 }
 
 td {
   padding: 16px 12px;
   border-bottom: 1px solid var(--border-light);
   font-size: 14px;
+  color: var(--text-main);
 }
 
 tr:hover td {
-  background: #f8fafc;
+  background: #27272a;
 }
 
 /* STATS */
@@ -234,39 +229,40 @@ tr:hover td {
   background: var(--bg-panel);
   border: 1px solid var(--border-light);
   padding: 24px;
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-md);
 }
 
 .stat-label {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 8px;
+  font-weight: 500;
+  margin-bottom: 12px;
 }
 
 .stat-value {
   font-size: 32px;
-  font-family: 'Playfair Display', serif;
+  font-weight: 600;
   color: var(--text-main);
+  letter-spacing: -1px;
 }
 
 /* FORMS */
 input, select, textarea {
   width: 100%;
-  padding: 10px 12px;
+  padding: 12px 16px;
+  background: #09090b;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-sm);
   font-family: 'Inter', sans-serif;
+  color: var(--text-main);
   margin-bottom: 16px;
   font-size: 14px;
+  transition: border-color 0.2s;
 }
 
 input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
 }
 
 .loading, .empty {
@@ -274,5 +270,4 @@ input:focus, select:focus, textarea:focus {
   text-align: center;
   color: var(--text-muted);
   font-size: 14px;
-  letter-spacing: 1px;
 }
