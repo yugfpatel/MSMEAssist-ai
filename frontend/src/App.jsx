@@ -270,7 +270,7 @@ function App() {
             placeholder="admin@apis.ai" 
             value={loginEmail} 
             onChange={e => setLoginEmail(e.target.value)}
-            style={{ width: '100%', marginBottom: '16px', padding: '12px', background: '#faf9f6', border: '1px solid #333', borderRadius: '8px', color: '#fff', boxSizing: 'border-box' }}
+            style={{ width: '100%', marginBottom: '16px', padding: '12px', background: '#faf9f6', border: '1px solid #333', borderRadius: '8px', color: '#0f172a', boxSizing: 'border-box' }}
           />
           
           <label style={{ display: 'block', marginBottom: '8px', color: '#ccc', fontSize: '18px' }}>Password</label>
@@ -279,7 +279,7 @@ function App() {
             placeholder="••••••••" 
             value={loginPassword} 
             onChange={e => setLoginPassword(e.target.value)}
-            style={{ width: '100%', marginBottom: '24px', padding: '12px', background: '#faf9f6', border: '1px solid #333', borderRadius: '8px', color: '#fff', boxSizing: 'border-box' }}
+            style={{ width: '100%', marginBottom: '24px', padding: '12px', background: '#faf9f6', border: '1px solid #333', borderRadius: '8px', color: '#0f172a', boxSizing: 'border-box' }}
           />
           
           {loginError && <div style={{ color: '#ff4d4f', marginBottom: '16px', textAlign: 'center', fontSize: '18px', background: 'rgba(255,77,79,0.1)', padding: '8px', borderRadius: '6px' }}>{loginError}</div>}
