@@ -96,12 +96,12 @@ export default function HoneyChain({ activeSection = "overview" }) {
 
   return (
     <div className="honey-chain-module">
-      {loading && <p style={{ color: "#8f96a2" }}>Loading apiary data...</p>}
+      {loading && <p style={{ color: "#6b635e" }}>Loading apiary data...</p>}
 
       {!loading && activeSection === "overview" && (
         <div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-            <h2 style={{ fontSize: "20px", color: "#f59e0b" }}>Apiary Overview</h2>
+            <h2 style={{ fontSize: "20px", color: "#d97706" }}>Apiary Overview</h2>
             <button 
               className="ghost-btn"
               onClick={async () => {
@@ -126,17 +126,17 @@ export default function HoneyChain({ activeSection = "overview" }) {
           </div>
           <div className="stats-grid">
             <div className="stat-card">
-              <div className="stat-icon" style={{ background: "rgba(245, 158, 11, 0.1)", color: "#f59e0b" }}>🐝</div>
+              <div className="stat-icon" style={{ background: "rgba(217, 119, 6, 0.1)", color: "#d97706" }}>🐝</div>
               <div className="stat-label">Active Hives</div>
               <div className="stat-value">{hives.length}</div>
             </div>
             <div className="stat-card">
-              <div className="stat-icon" style={{ background: "rgba(245, 158, 11, 0.1)", color: "#f59e0b" }}>🍯</div>
+              <div className="stat-icon" style={{ background: "rgba(217, 119, 6, 0.1)", color: "#d97706" }}>🍯</div>
               <div className="stat-label">Total Harvests</div>
               <div className="stat-value">{harvests.length}</div>
             </div>
             <div className="stat-card">
-              <div className="stat-icon" style={{ background: "rgba(245, 158, 11, 0.1)", color: "#f59e0b" }}>📦</div>
+              <div className="stat-icon" style={{ background: "rgba(217, 119, 6, 0.1)", color: "#d97706" }}>📦</div>
               <div className="stat-label">Traceable Batches</div>
               <div className="stat-value">{batches.length}</div>
             </div>
@@ -146,19 +146,19 @@ export default function HoneyChain({ activeSection = "overview" }) {
 
       {!loading && activeSection === "hives" && (
         <div>
-          <h2 style={{ fontSize: "20px", color: "#f59e0b", marginBottom: "16px" }}>Hive Management</h2>
+          <h2 style={{ fontSize: "20px", color: "#d97706", marginBottom: "16px" }}>Hive Management</h2>
           <div className="product-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
             {hives.map(hive => (
               <div key={hive.id} className="panel product-card" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                   <div>
                     <h3 style={{ color: "#fff", margin: 0 }}>{hive.apiary_location}</h3>
-                    <span style={{ color: "#8f96a2", fontSize: "13px" }}>{hive.colony_type}</span>
+                    <span style={{ color: "#6b635e", fontSize: "13px" }}>{hive.colony_type}</span>
                   </div>
-                  <span className="live-badge" style={{ background: "rgba(245,158,11,0.1)", color: "#f59e0b" }}>{hive.status}</span>
+                  <span className="live-badge" style={{ background: "rgba(245,158,11,0.1)", color: "#d97706" }}>{hive.status}</span>
                 </div>
                 
-                <div style={{ fontSize: "14px", color: "#d7dbe1" }}>Queen: {hive.queen_status}</div>
+                <div style={{ fontSize: "14px", color: "#4f4a47" }}>Queen: {hive.queen_status}</div>
                 
                 <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
                   <button className="ghost-btn" onClick={() => demoIoT(hive.id)} style={{ flex: 1, fontSize: "12px" }}>📶 Ping IoT</button>
@@ -168,8 +168,8 @@ export default function HoneyChain({ activeSection = "overview" }) {
                 </div>
                 
                 {sensorData[hive.id] && sensorData[hive.id].length > 0 && (
-                  <div style={{ marginTop: "4px", fontSize: "12px", background: "#171a20", padding: "10px", borderRadius: "8px", border: "1px solid #292e36", color: "#9aa1ad" }}>
-                    <div style={{ marginBottom: "4px", color: "#f5f7fa" }}><strong>Live Sensors</strong></div>
+                  <div style={{ marginTop: "4px", fontSize: "12px", background: "#ffffff", padding: "10px", borderRadius: "8px", border: "1px solid #f3f1e9", color: "#6b635e" }}>
+                    <div style={{ marginBottom: "4px", color: "#2d2724" }}><strong>Live Sensors</strong></div>
                     Temp: {sensorData[hive.id][0].temperature.toFixed(1)}°C | Hum: {sensorData[hive.id][0].humidity.toFixed(1)}% | Wt: {sensorData[hive.id][0].weight.toFixed(1)}kg
                   </div>
                 )}
@@ -177,8 +177,8 @@ export default function HoneyChain({ activeSection = "overview" }) {
                 {insights[hive.id] && (
                   <div style={{ marginTop: "4px", background: "rgba(168,85,247,0.05)", padding: "12px", borderRadius: "8px", border: "1px solid rgba(168,85,247,0.2)", fontSize: "13px" }}>
                     <strong style={{ color: "#c084fc", display: "block", marginBottom: "4px" }}>🤖 AI Insight ({insights[hive.id].risk_level} Risk)</strong> 
-                    <span style={{ color: "#d7dbe1", display: "block", marginBottom: "6px" }}>{insights[hive.id].health_summary}</span>
-                    <em style={{ color: "#9aa1ad" }}>Action: {insights[hive.id].recommended_action}</em>
+                    <span style={{ color: "#4f4a47", display: "block", marginBottom: "6px" }}>{insights[hive.id].health_summary}</span>
+                    <em style={{ color: "#6b635e" }}>Action: {insights[hive.id].recommended_action}</em>
                   </div>
                 )}
               </div>
@@ -189,7 +189,7 @@ export default function HoneyChain({ activeSection = "overview" }) {
 
       {!loading && activeSection === "harvests" && (
         <div className="panel table-panel">
-          <h2 style={{ fontSize: "20px", color: "#f59e0b", marginBottom: "16px" }}>Harvest Records</h2>
+          <h2 style={{ fontSize: "20px", color: "#d97706", marginBottom: "16px" }}>Harvest Records</h2>
           <table>
             <thead>
               <tr>
@@ -204,10 +204,10 @@ export default function HoneyChain({ activeSection = "overview" }) {
               {harvests.map(h => (
                 <tr key={h.id}>
                   <td>{h.harvest_date}</td>
-                  <td><strong style={{ color: "#f0f2f5" }}>{h.hives?.apiary_location}</strong></td>
+                  <td><strong style={{ color: "#2d2724" }}>{h.hives?.apiary_location}</strong></td>
                   <td>{h.honey_type}</td>
-                  <td style={{ color: "#f59e0b", fontWeight: "bold" }}>{h.quantity} {h.unit}</td>
-                  <td><span className="status completed" style={{ background: "rgba(245,158,11,0.1)", color: "#f59e0b" }}>{h.quality_grade}</span></td>
+                  <td style={{ color: "#d97706", fontWeight: "bold" }}>{h.quantity} {h.unit}</td>
+                  <td><span className="status completed" style={{ background: "rgba(245,158,11,0.1)", color: "#d97706" }}>{h.quality_grade}</span></td>
                 </tr>
               ))}
             </tbody>
@@ -218,15 +218,15 @@ export default function HoneyChain({ activeSection = "overview" }) {
       {!loading && activeSection === "batches" && (
         <div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-            <h2 style={{ fontSize: "20px", color: "#f59e0b", margin: 0 }}>Traceability Batches</h2>
+            <h2 style={{ fontSize: "20px", color: "#d97706", margin: 0 }}>Traceability Batches</h2>
             <button className="primary-btn" onClick={() => setShowBatchForm(!showBatchForm)}>
               {showBatchForm ? "Cancel" : "➕ Create Batch"}
             </button>
           </div>
 
           {showBatchForm && (
-            <div className="panel" style={{ marginBottom: "24px", padding: "20px", background: "#1c1714", border: "1px solid #2a211e" }}>
-              <h3 style={{ color: "#f5f7fa", marginTop: 0, marginBottom: "16px" }}>New Honey Batch</h3>
+            <div className="panel" style={{ marginBottom: "24px", padding: "20px", background: "#ffffff", border: "1px solid #e5e0d8" }}>
+              <h3 style={{ color: "#2d2724", marginTop: 0, marginBottom: "16px" }}>New Honey Batch</h3>
               
               <div style={{ display: "flex", gap: "10px", marginBottom: "20px", background: "rgba(168,85,247,0.05)", padding: "16px", borderRadius: "8px", border: "1px solid rgba(168,85,247,0.2)" }}>
                 <input 
@@ -234,7 +234,7 @@ export default function HoneyChain({ activeSection = "overview" }) {
                   value={aiPrompt} 
                   onChange={e => setAiPrompt(e.target.value)} 
                   placeholder="e.g. Log a new 20kg batch of Premium Mustard Honey harvested today" 
-                  style={{ flex: 1, padding: "10px", borderRadius: "6px", border: "1px solid #2a211e", background: "#120e0c", color: "#fdfbf9" }}
+                  style={{ flex: 1, padding: "10px", borderRadius: "6px", border: "1px solid #e5e0d8", background: "#f3f1e9", color: "#2d2724" }}
                 />
                 <button className="ghost-btn" onClick={handleAIGenerateBatch} disabled={isGeneratingBatch} style={{ color: "#a855f7", borderColor: "rgba(168,85,247,0.3)", padding: "0 16px" }}>
                   {isGeneratingBatch ? "⏳ Generating..." : "✨ Auto-fill with AI"}
@@ -242,17 +242,17 @@ export default function HoneyChain({ activeSection = "overview" }) {
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "20px" }}>
-                <input type="text" placeholder="Batch ID (e.g. HC-001)" value={batchForm.batch_id} onChange={e => setBatchForm({...batchForm, batch_id: e.target.value})} style={{ padding: "10px", borderRadius: "6px", border: "1px solid #2a211e", background: "#120e0c", color: "#fdfbf9" }} />
-                <input type="text" placeholder="Product Name" value={batchForm.product_name} onChange={e => setBatchForm({...batchForm, product_name: e.target.value})} style={{ padding: "10px", borderRadius: "6px", border: "1px solid #2a211e", background: "#120e0c", color: "#fdfbf9" }} />
-                <input type="text" placeholder="Variety (e.g. Wildflower)" value={batchForm.honey_variety} onChange={e => setBatchForm({...batchForm, honey_variety: e.target.value})} style={{ padding: "10px", borderRadius: "6px", border: "1px solid #2a211e", background: "#120e0c", color: "#fdfbf9" }} />
-                <input type="number" placeholder="Quantity (kg)" value={batchForm.quantity || ""} onChange={e => setBatchForm({...batchForm, quantity: Number(e.target.value)})} style={{ padding: "10px", borderRadius: "6px", border: "1px solid #2a211e", background: "#120e0c", color: "#fdfbf9" }} />
-                <input type="date" placeholder="Harvest Date" value={batchForm.harvest_date} onChange={e => setBatchForm({...batchForm, harvest_date: e.target.value})} style={{ padding: "10px", borderRadius: "6px", border: "1px solid #2a211e", background: "#120e0c", color: "#fdfbf9" }} />
-                <input type="date" placeholder="Packaging Date" value={batchForm.packaging_date} onChange={e => setBatchForm({...batchForm, packaging_date: e.target.value})} style={{ padding: "10px", borderRadius: "6px", border: "1px solid #2a211e", background: "#120e0c", color: "#fdfbf9" }} />
-                <input type="text" placeholder="Quality Info (e.g. Lab Tested)" value={batchForm.quality_info} onChange={e => setBatchForm({...batchForm, quality_info: e.target.value})} style={{ gridColumn: "span 2", padding: "10px", borderRadius: "6px", border: "1px solid #2a211e", background: "#120e0c", color: "#fdfbf9" }} />
+                <input type="text" placeholder="Batch ID (e.g. HC-001)" value={batchForm.batch_id} onChange={e => setBatchForm({...batchForm, batch_id: e.target.value})} style={{ padding: "10px", borderRadius: "6px", border: "1px solid #e5e0d8", background: "#f3f1e9", color: "#2d2724" }} />
+                <input type="text" placeholder="Product Name" value={batchForm.product_name} onChange={e => setBatchForm({...batchForm, product_name: e.target.value})} style={{ padding: "10px", borderRadius: "6px", border: "1px solid #e5e0d8", background: "#f3f1e9", color: "#2d2724" }} />
+                <input type="text" placeholder="Variety (e.g. Wildflower)" value={batchForm.honey_variety} onChange={e => setBatchForm({...batchForm, honey_variety: e.target.value})} style={{ padding: "10px", borderRadius: "6px", border: "1px solid #e5e0d8", background: "#f3f1e9", color: "#2d2724" }} />
+                <input type="number" placeholder="Quantity (kg)" value={batchForm.quantity || ""} onChange={e => setBatchForm({...batchForm, quantity: Number(e.target.value)})} style={{ padding: "10px", borderRadius: "6px", border: "1px solid #e5e0d8", background: "#f3f1e9", color: "#2d2724" }} />
+                <input type="date" placeholder="Harvest Date" value={batchForm.harvest_date} onChange={e => setBatchForm({...batchForm, harvest_date: e.target.value})} style={{ padding: "10px", borderRadius: "6px", border: "1px solid #e5e0d8", background: "#f3f1e9", color: "#2d2724" }} />
+                <input type="date" placeholder="Packaging Date" value={batchForm.packaging_date} onChange={e => setBatchForm({...batchForm, packaging_date: e.target.value})} style={{ padding: "10px", borderRadius: "6px", border: "1px solid #e5e0d8", background: "#f3f1e9", color: "#2d2724" }} />
+                <input type="text" placeholder="Quality Info (e.g. Lab Tested)" value={batchForm.quality_info} onChange={e => setBatchForm({...batchForm, quality_info: e.target.value})} style={{ gridColumn: "span 2", padding: "10px", borderRadius: "6px", border: "1px solid #e5e0d8", background: "#f3f1e9", color: "#2d2724" }} />
               </div>
 
               <div style={{ textAlign: "right" }}>
-                <button className="primary-btn" onClick={handleSaveBatch} style={{ background: "#f59e0b", color: "#171311", fontWeight: "bold" }}>Save & Mint Batch</button>
+                <button className="primary-btn" onClick={handleSaveBatch} style={{ background: "#d97706", color: "#faf9f6", fontWeight: "bold" }}>Save & Mint Batch</button>
               </div>
             </div>
           )}
@@ -261,13 +261,13 @@ export default function HoneyChain({ activeSection = "overview" }) {
               <div key={b.id} className="panel product-card" style={{ padding: "20px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
                   <div>
-                    <h3 style={{ margin: 0, color: "#f5f7fa", fontSize: "18px" }}>{b.product_name}</h3>
-                    <span style={{ color: "#f59e0b", fontSize: "13px", fontFamily: "monospace", letterSpacing: "1px" }}>{b.batch_id}</span>
+                    <h3 style={{ margin: 0, color: "#2d2724", fontSize: "18px" }}>{b.product_name}</h3>
+                    <span style={{ color: "#d97706", fontSize: "13px", fontFamily: "monospace", letterSpacing: "1px" }}>{b.batch_id}</span>
                   </div>
                   <span className="live-badge" style={{ background: "rgba(16, 185, 129, 0.1)", color: "#10b981" }}>{b.status}</span>
                 </div>
                 
-                <div style={{ fontSize: "14px", color: "#9da4af", marginBottom: "16px", lineHeight: "1.6" }}>
+                <div style={{ fontSize: "14px", color: "#6b635e", marginBottom: "16px", lineHeight: "1.6" }}>
                   <div><strong>Variety:</strong> {b.honey_variety}</div>
                   <div><strong>Packaged:</strong> {b.packaging_date}</div>
                   <div><strong>Quality:</strong> {b.quality_info}</div>
@@ -277,7 +277,7 @@ export default function HoneyChain({ activeSection = "overview" }) {
                   <QRCode value={`${window.location.origin}/verify/batch/${b.batch_id}`} size={120} />
                 </div>
                 
-                <a href={`/verify/batch/${b.batch_id}`} target="_blank" rel="noreferrer" style={{ display: "block", textAlign: "center", padding: "10px", background: "rgba(245, 158, 11, 0.1)", color: "#f59e0b", textDecoration: "none", borderRadius: "8px", fontWeight: "bold", border: "1px solid rgba(245, 158, 11, 0.2)", transition: "all 0.2s" }} onMouseOver={e => e.currentTarget.style.background="rgba(245, 158, 11, 0.2)"} onMouseOut={e => e.currentTarget.style.background="rgba(245, 158, 11, 0.1)"}>
+                <a href={`/verify/batch/${b.batch_id}`} target="_blank" rel="noreferrer" style={{ display: "block", textAlign: "center", padding: "10px", background: "rgba(217, 119, 6, 0.1)", color: "#d97706", textDecoration: "none", borderRadius: "8px", fontWeight: "bold", border: "1px solid rgba(217, 119, 6, 0.2)", transition: "all 0.2s" }} onMouseOver={e => e.currentTarget.style.background="rgba(217, 119, 6, 0.2)"} onMouseOut={e => e.currentTarget.style.background="rgba(217, 119, 6, 0.1)"}>
                   🔍 View Public Traceability
                 </a>
               </div>

@@ -31,45 +31,45 @@ export default function VerifyBatch({ batchId }) {
   if (!batch) return <div className="app-container"><div className="error-message">Batch {batchId} not found or invalid.</div></div>;
 
   return (
-    <div className="verify-container" style={{ padding: "30px 20px", maxWidth: "600px", margin: "0 auto", fontFamily: "sans-serif", background: "#171311", minHeight: "100vh", color: "#fdfbf9" }}>
+    <div className="verify-container" style={{ padding: "40px 20px", maxWidth: "600px", margin: "0 auto", fontFamily: "'Inter', sans-serif", background: "#faf9f6", minHeight: "100vh", color: "#2d2724" }}>
       <div style={{ textAlign: "center", marginBottom: "30px" }}>
-        <div style={{ fontSize: "40px", marginBottom: "10px" }}>🐝</div>
-        <h1 style={{ color: "#f59e0b", margin: "0 0 5px 0" }}>ApisAI</h1>
-        <p style={{ color: "#a39791", margin: "0 0 20px 0", fontSize: "14px" }}>AI-Powered Smart Beekeeping & Honey Traceability</p>
-        <div style={{ background: blockchain?.verified ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)", color: blockchain?.verified ? "#10b981" : "#ef4444", border: `1px solid ${blockchain?.verified ? "rgba(16, 185, 129, 0.2)" : "rgba(239, 68, 68, 0.2)"}`, padding: "10px 20px", borderRadius: "8px", fontWeight: "bold", display: "inline-block", marginBottom: "20px" }}>
-          {blockchain?.verified ? "✓ Blockchain Traceability Verified" : "⚠️ Traceability Verification Failed"}
+        <div style={{ fontSize: "48px", marginBottom: "10px" }}>🍯</div>
+        <h1 style={{ color: "#d97706", margin: "0 0 5px 0", fontSize: "32px", fontWeight: "800" }}>ApisAI</h1>
+        <p style={{ color: "#6b635e", margin: "0 0 24px 0", fontSize: "15px", fontWeight: "500" }}>Verified Farm-to-Table Traceability</p>
+        <div style={{ background: blockchain?.verified ? "#ecfdf5" : "#fef2f2", color: blockchain?.verified ? "#059669" : "#dc2626", border: `1px solid ${blockchain?.verified ? "#a7f3d0" : "#fecaca"}`, padding: "12px 24px", borderRadius: "8px", fontWeight: "600", display: "inline-block", marginBottom: "24px", boxShadow: "0 2px 4px rgba(0,0,0,0.02)" }}>
+          {blockchain?.verified ? "✓ Cryptographically Verified" : "⚠️ Traceability Verification Failed"}
         </div>
         
-        <div style={{ display: "flex", justifyContent: "center", padding: "10px", background: "#fff", borderRadius: "8px", width: "fit-content", margin: "0 auto" }}>
-          <QRCode value={window.location.href} size={100} />
+        <div style={{ display: "flex", justifyContent: "center", padding: "15px", background: "#ffffff", borderRadius: "12px", border: "1px solid #e5e0d8", width: "fit-content", margin: "0 auto", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}>
+          <QRCode value={window.location.href} size={110} fgColor="#2d2724" />
         </div>
       </div>
 
-      <div style={{ background: "#1c1714", padding: "24px", borderRadius: "12px", border: "1px solid #2a211e", marginBottom: "20px" }}>
-        <h2 style={{ margin: "0 0 15px 0", color: "#f59e0b", fontSize: "18px" }}>Batch Information</h2>
-        <div style={{ display: "grid", gap: "10px", color: "#d6cfc9" }}>
-          <p style={{ margin: 0 }}><strong>Batch ID:</strong> <span style={{ color: "#fdfbf9" }}>{batch.batch_id}</span></p>
-          <p style={{ margin: 0 }}><strong>Product:</strong> <span style={{ color: "#fdfbf9" }}>{batch.product_name}</span></p>
-          <p style={{ margin: 0 }}><strong>Variety:</strong> <span style={{ color: "#fdfbf9" }}>{batch.honey_variety}</span></p>
-          <p style={{ margin: 0 }}><strong>Harvest Date:</strong> <span style={{ color: "#fdfbf9" }}>{batch.harvest_date}</span></p>
-          <p style={{ margin: 0 }}><strong>Packaging Date:</strong> <span style={{ color: "#fdfbf9" }}>{batch.packaging_date}</span></p>
-          <p style={{ margin: 0 }}><strong>Quality:</strong> <span style={{ color: "#fdfbf9" }}>{batch.quality_info}</span></p>
+      <div style={{ background: "#ffffff", padding: "28px", borderRadius: "16px", border: "1px solid #e5e0d8", marginBottom: "24px", boxShadow: "0 4px 12px rgba(0,0,0,0.03)" }}>
+        <h2 style={{ margin: "0 0 16px 0", color: "#d97706", fontSize: "18px", fontWeight: "700" }}>Batch Details</h2>
+        <div style={{ display: "grid", gap: "12px", color: "#6b635e", fontSize: "15px" }}>
+          <p style={{ margin: 0 }}><strong>Batch ID:</strong> <span style={{ color: "#2d2724", fontWeight: "500" }}>{batch.batch_id}</span></p>
+          <p style={{ margin: 0 }}><strong>Product:</strong> <span style={{ color: "#2d2724", fontWeight: "500" }}>{batch.product_name}</span></p>
+          <p style={{ margin: 0 }}><strong>Variety:</strong> <span style={{ color: "#2d2724", fontWeight: "500" }}>{batch.honey_variety}</span></p>
+          <p style={{ margin: 0 }}><strong>Harvest Date:</strong> <span style={{ color: "#2d2724", fontWeight: "500" }}>{batch.harvest_date}</span></p>
+          <p style={{ margin: 0 }}><strong>Packaging Date:</strong> <span style={{ color: "#2d2724", fontWeight: "500" }}>{batch.packaging_date}</span></p>
+          <p style={{ margin: 0 }}><strong>Quality Grade:</strong> <span style={{ color: "#2d2724", fontWeight: "500" }}>{batch.quality_info}</span></p>
         </div>
       </div>
 
-      <div style={{ background: "#1c1714", padding: "24px", borderRadius: "12px", border: "1px solid #2a211e" }}>
-        <h2 style={{ margin: "0 0 20px 0", color: "#f59e0b", fontSize: "18px" }}>Traceability Timeline</h2>
-        <div className="timeline" style={{ borderLeft: "2px solid rgba(245, 158, 11, 0.3)", paddingLeft: "20px", marginLeft: "10px" }}>
+      <div style={{ background: "#ffffff", padding: "28px", borderRadius: "16px", border: "1px solid #e5e0d8", boxShadow: "0 4px 12px rgba(0,0,0,0.03)" }}>
+        <h2 style={{ margin: "0 0 24px 0", color: "#d97706", fontSize: "18px", fontWeight: "700" }}>Journey Timeline</h2>
+        <div className="timeline" style={{ borderLeft: "2px solid #fcd34d", paddingLeft: "24px", marginLeft: "12px" }}>
           {(blockchain?.records || []).map((rec, i) => (
-            <div key={i} style={{ marginBottom: "20px", position: "relative" }}>
-              <div style={{ position: "absolute", left: "-27px", top: "4px", width: "12px", height: "12px", background: "#f59e0b", borderRadius: "50%", boxShadow: "0 0 0 4px rgba(245, 158, 11, 0.1)" }}></div>
-              <strong style={{ display: "block", color: "#fdfbf9", fontSize: "16px", marginBottom: "4px" }}>{rec.event_type}</strong>
-              <div style={{ fontSize: "13px", color: "#a39791", marginBottom: "4px" }}>{new Date(rec.created_at).toLocaleString()}</div>
-              <div style={{ fontSize: "12px", color: "#8a7c76", fontFamily: "monospace", wordBreak: "break-all" }}>Hash: {rec.current_hash}</div>
+            <div key={i} style={{ marginBottom: "24px", position: "relative" }}>
+              <div style={{ position: "absolute", left: "-31px", top: "4px", width: "12px", height: "12px", background: "#d97706", borderRadius: "50%", boxShadow: "0 0 0 4px #fef3c7" }}></div>
+              <strong style={{ display: "block", color: "#2d2724", fontSize: "16px", marginBottom: "4px" }}>{rec.event_type}</strong>
+              <div style={{ fontSize: "13px", color: "#6b635e", marginBottom: "6px", fontWeight: "500" }}>{new Date(rec.created_at).toLocaleString()}</div>
+              <div style={{ fontSize: "11px", color: "#9ca3af", fontFamily: "monospace", wordBreak: "break-all", background: "#f9fafb", padding: "6px", borderRadius: "4px", border: "1px solid #f3f4f6" }}>Hash: {rec.current_hash}</div>
             </div>
           ))}
         </div>
-        <p style={{ textAlign: "center", fontSize: "12px", color: "#a39791", marginTop: "20px", fontStyle: "italic" }}>Tamper-evident hash-chain prototype.</p>
+        <p style={{ textAlign: "center", fontSize: "12px", color: "#9ca3af", marginTop: "24px", fontWeight: "500" }}>Secured by SHA-256 Cryptographic Hash-chain</p>
       </div>
     </div>
   );
