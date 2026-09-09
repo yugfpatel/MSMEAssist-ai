@@ -295,9 +295,9 @@ function App() {
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-mark" style={{ background: "rgba(217, 119, 6, 0.1)", border: "1px solid rgba(217, 119, 6, 0.2)" }}></div>
+          <div className="brand-mark" ></div>
           <div>
-            <strong style={{ color: "#d97706" }}>APIS AI</strong>
+            <strong >APIS AI</strong>
             <span>Smart Apiary Platform</span>
           </div>
         </div>
