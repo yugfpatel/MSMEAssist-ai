@@ -279,6 +279,7 @@ function App() {
   const [pForm, setPForm] = useState({ name: "", description: "", price: "", stock: "" });
   const [pSaving, setPSaving] = useState(false);
   const [pError, setPError] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     let live = true;
@@ -392,8 +393,11 @@ function App() {
 
   return (
     <div className="shell">
+      {/* ── MOBILE OVERLAY ── */}
+      {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
+
       {/* ── SIDEBAR ── */}
-      <aside className="sidebar">
+      <aside className={"sidebar" + (sidebarOpen ? " open" : "")}>
         <div className="brand">
           <div className="brand-icon">A</div>
           <div>
@@ -405,7 +409,7 @@ function App() {
         <div className="nav-section-label">Workspace</div>
         <nav>
           {NAV.map(n => (
-            <button key={n.id} className={"nav-btn" + (active === n.id ? " active" : "")} onClick={() => setActive(n.id)}>
+            <button key={n.id} className={"nav-btn" + (active === n.id ? " active" : "")} onClick={() => { setActive(n.id); setSidebarOpen(false); }}>
               <span className="nav-ico">{n.icon}</span>
               {n.label}
             </button>
@@ -428,9 +432,14 @@ function App() {
       {/* ── MAIN ── */}
       <main className="main">
         <header className="topbar">
-          <div>
-            <div className="topbar-eye">APIARY DASHBOARD</div>
-            <h1 className="topbar-title">{pageTitle}</h1>
+          <div className="topbar-left">
+            <button className="hamburger" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Menu">
+              <span /><span /><span />
+            </button>
+            <div>
+              <div className="topbar-eye">APIARY DASHBOARD</div>
+              <h1 className="topbar-title">{pageTitle}</h1>
+            </div>
           </div>
           <div className={"status-pill" + (status === "Connected" ? " ok" : "")}>
             <span className="status-dot" />
