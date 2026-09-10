@@ -503,7 +503,8 @@ function App() {
 
         {/* INVOICES */}
         {active === "invoices" && (
-          <Page title="Invoices" subtitle="Invoices generated automatically after successful payment.">
+          <Page title="Invoices" subtitle="Generate and download PDF invoices.">
+            <InvoiceGenerator products={products} business={business} />
             <div className="panel"><InvoicesTable invoices={invoices} onDelete={deleteInvoice} /></div>
           </Page>
         )}
@@ -550,6 +551,188 @@ function App() {
         )}
       </main>
     </div>
+  );
+}
+
+/* ─── invoice generator ───────────────────────────── */
+function InvoiceGenerator({ products, business }) {
+  const [customer, setCustomer] = useState("");
+  const [items, setItems] = useState([{ name: "", quantity: 1, price: "" }]);
+  const [gst, setGst] = useState(0);
+  const [discount, setDiscount] = useState(0);
+  const [generating, setGenerating] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState("");
+  const [history, setHistory] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("apisai_invoices") || "[]"); } catch { return []; }
+  });
+
+  function addRow() { setItems([...items, { name: "", quantity: 1, price: "" }]); }
+  function removeRow(i) { if (items.length > 1) setItems(items.filter((_, j) => j !== i)); }
+  function updateRow(i, field, val) { setItems(items.map((r, j) => j === i ? { ...r, [field]: val } : r)); }
+
+  function pickProduct(i, productName) {
+    const p = (products || []).find(x => x.name === productName);
+    if (p) updateRow(i, "name", p.name); updateRow(i, "price", p.price);
+  }
+
+  function subtotal() { return items.reduce((s, it) => s + (Number(it.quantity) || 0) * (Number(it.price) || 0), 0); }
+
+  function downloadBase64(b64, filename) {
+    const bytes = atob(b64);
+    const arr = new Uint8Array(bytes.length);
+    for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+    const blob = new Blob([arr], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename; document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+  }
+
+  async function generate(e) {
+    e.preventDefault();
+    setError(""); setResult(null);
+    if (!customer.trim()) { setError("Customer name is required."); return; }
+    const validItems = items.filter(it => it.name.trim() && Number(it.price) > 0);
+    if (!validItems.length) { setError("Add at least one item with a price."); return; }
+
+    setGenerating(true);
+    try {
+      const res = await API.post("/invoice/generate", {
+        business_name: business?.name || "Golden Hive Honey Farm",
+        customer_name: customer.trim(),
+        items: validItems.map(it => ({ name: it.name.trim(), quantity: Number(it.quantity) || 1, price: Number(it.price) })),
+        gst_percent: Number(gst) || 0,
+        discount: Number(discount) || 0,
+        create_payment: false,
+      }, { timeout: 30000 });
+
+      if (res.data.success) {
+        setResult(res.data);
+        // Auto-download
+        if (res.data.pdf_bytes) downloadBase64(res.data.pdf_bytes, res.data.filename || "invoice.pdf");
+        // Save to local history
+        const entry = {
+          invoice_number: res.data.invoice_number,
+          customer: customer.trim(),
+          total: res.data.total,
+          date: new Date().toISOString(),
+          pdf_bytes: res.data.pdf_bytes,
+          filename: res.data.filename,
+          invoice_url: res.data.invoice_url,
+        };
+        const updated = [entry, ...history].slice(0, 50);
+        setHistory(updated);
+        localStorage.setItem("apisai_invoices", JSON.stringify(updated));
+      } else {
+        setError(res.data.detail || "Failed to generate invoice.");
+      }
+    } catch (err) {
+      setError(err.response?.data?.detail || err.message || "Failed to generate invoice.");
+    }
+    setGenerating(false);
+  }
+
+  const sub = subtotal();
+  const gstAmt = sub * (Number(gst) / 100);
+  const total = Math.max(0, sub + gstAmt - Number(discount || 0));
+
+  return (
+    <>
+      <div className="panel" style={{ marginBottom: 16 }}>
+        <div className="panel-hd"><span className="panel-title">Create Invoice</span><span className="panel-sub">PDF generated on server</span></div>
+        <form onSubmit={generate} style={{ padding: "20px 24px" }}>
+          <div className="form-row">
+            <div className="form-field">
+              <label className="field-label">Customer Name</label>
+              <input className="field-input" placeholder="e.g. Rajesh Kumar" value={customer} onChange={e => setCustomer(e.target.value)} />
+            </div>
+            <div className="form-field">
+              <label className="field-label">GST %</label>
+              <input className="field-input" type="number" min="0" step="0.5" value={gst} onChange={e => setGst(e.target.value)} />
+            </div>
+          </div>
+
+          {/* Line Items */}
+          <div className="field-label" style={{ marginBottom: 10 }}>Line Items</div>
+          {items.map((it, i) => (
+            <div key={i} className="invoice-line">
+              <div className="invoice-line-inputs">
+                <select className="field-input" value={it.name} onChange={e => { updateRow(i, "name", e.target.value); pickProduct(i, e.target.value); }} style={{ flex: 2 }}>
+                  <option value="">— Select product or type —</option>
+                  {(products || []).map(p => <option key={p.id} value={p.name}>{p.name} (₹{p.price})</option>)}
+                </select>
+                <input className="field-input" placeholder="Item name" value={it.name} onChange={e => updateRow(i, "name", e.target.value)} style={{ flex: 2 }} />
+                <input className="field-input" type="number" min="1" placeholder="Qty" value={it.quantity} onChange={e => updateRow(i, "quantity", e.target.value)} style={{ flex: 0.7 }} />
+                <input className="field-input" type="number" min="0" step="0.01" placeholder="Price" value={it.price} onChange={e => updateRow(i, "price", e.target.value)} style={{ flex: 1 }} />
+                <button type="button" className="btn-danger-sm" onClick={() => removeRow(i)} disabled={items.length <= 1}>✕</button>
+              </div>
+            </div>
+          ))}
+          <button type="button" className="btn-ghost" onClick={addRow} style={{ marginBottom: 20, marginTop: 8 }}>+ Add item</button>
+
+          {/* Totals */}
+          <div className="invoice-totals">
+            <div className="invoice-total-row"><span>Subtotal</span><strong>₹{sub.toFixed(2)}</strong></div>
+            {Number(gst) > 0 && <div className="invoice-total-row"><span>GST ({gst}%)</span><strong>₹{gstAmt.toFixed(2)}</strong></div>}
+            <div className="form-field" style={{ maxWidth: 200, marginLeft: "auto" }}>
+              <label className="field-label">Discount (₹)</label>
+              <input className="field-input" type="number" min="0" step="1" value={discount} onChange={e => setDiscount(e.target.value)} />
+            </div>
+            <div className="invoice-total-row total"><span>Total</span><strong>₹{total.toFixed(2)}</strong></div>
+          </div>
+
+          {error && <div className="form-err">{error}</div>}
+          {result && <div className="invoice-success">✓ Invoice {result.invoice_number} generated — ₹{result.total}</div>}
+
+          <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+            <button className="btn-primary" type="submit" disabled={generating}>
+              {generating ? "Generating…" : "Generate & Download PDF"}
+            </button>
+            {result?.pdf_bytes && (
+              <button type="button" className="btn-ghost" onClick={() => downloadBase64(result.pdf_bytes, result.filename || "invoice.pdf")}>
+                ↓ Download Again
+              </button>
+            )}
+            {result?.invoice_url && (
+              <button type="button" className="btn-ghost" onClick={() => window.open(result.invoice_url, "_blank")}>
+                Open in Browser
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+
+      {/* Local history of generated invoices */}
+      {history.length > 0 && (
+        <div className="panel" style={{ marginBottom: 16 }}>
+          <div className="panel-hd"><span className="panel-title">Generated Invoices</span><span className="panel-sub">{history.length} saved locally</span></div>
+          <table className="data-table">
+            <thead><tr><th>Invoice #</th><th>Customer</th><th>Total</th><th>Date</th><th>Action</th></tr></thead>
+            <tbody>
+              {history.map((h, i) => (
+                <tr key={i}>
+                  <td className="mono">{h.invoice_number}</td>
+                  <td>{h.customer}</td>
+                  <td><strong>₹{h.total}</strong></td>
+                  <td className="dimmed">{fmtTime(h.date)}</td>
+                  <td>
+                    <div className="action-row">
+                      {h.pdf_bytes && (
+                        <button className="btn-ghost-sm" onClick={() => downloadBase64(h.pdf_bytes, h.filename || "invoice.pdf")}>↓ PDF</button>
+                      )}
+                      {h.invoice_url && (
+                        <button className="btn-ghost-sm" onClick={() => window.open(h.invoice_url, "_blank")}>Open</button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </>
   );
 }
 
