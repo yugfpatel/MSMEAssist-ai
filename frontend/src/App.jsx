@@ -287,7 +287,7 @@ function App() {
         await API.get("/", { timeout: 10000 });
         if (!live) return;
         setStatus("Connected");
-        const safeGet = async (url) => { try { const r = await API.get(url, { timeout: 5000 }); return r.data; } catch { return null; } };
+        const safeGet = async (url, ms = 15000) => { try { const r = await API.get(url, { timeout: ms }); return r.data; } catch (e) { console.warn("safeGet failed:", url, e.message); return null; } };
         const [b, pr, sm, or, py, inv] = await Promise.all([
           safeGet("/business"),
           safeGet("/products"),
@@ -298,7 +298,8 @@ function App() {
         ]);
         if (!live) return;
         if (b) setBusiness(b);
-        setProducts(pr || []);
+        const productList = Array.isArray(pr) ? pr : (pr?.products || pr?.data || []);
+        setProducts(productList);
         setSummary(sm?.summary || sm || {});
         setOrders(or?.orders || or || []);
         setPayments(py?.payments || py || []);
