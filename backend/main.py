@@ -664,6 +664,35 @@ def get_dashboard_invoices():
                 "created_at": order.get("created_at"),
             })
         
+        # Also fetch standalone invoices from the storage bucket
+        try:
+            files = supabase.storage.from_("invoices").list()
+            for f in files:
+                name = f.get("name")
+                if name and name.endswith(".pdf"):
+                    # Generate a public URL
+                    file_url = supabase.storage.from_("invoices").get_public_url(name)
+                    inv_num = name.replace(".pdf", "")
+                    
+                    # Check if it's already in the list from orders
+                    if not any(i.get("invoice_number") == inv_num for i in invoices_list):
+                        invoices_list.append({
+                            "id": f.get("id") or name,
+                            "invoice_number": inv_num,
+                            "customer_name": "Direct Invoice",
+                            "customer_phone": "",
+                            "amount": 0,
+                            "payment_status": "Paid",
+                            "status": "Completed",
+                            "created_at": f.get("created_at"),
+                            "invoice_url": file_url
+                        })
+        except Exception as bucket_err:
+            print(f"Could not fetch from bucket: {bucket_err}")
+
+        # Sort combined list by created_at descending
+        invoices_list.sort(key=lambda x: x.get("created_at") or "", reverse=True)
+
         return {"invoices": invoices_list}
     except Exception as e:
         print(f"Error in get_dashboard_invoices: {e}")
