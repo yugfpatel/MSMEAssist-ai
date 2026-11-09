@@ -374,17 +374,28 @@ function App() {
   if (!loggedIn) return (
     <div className="login-screen">
       <div className="login-card">
-        <div className="login-logo">APIS AI</div>
-        <p className="login-tagline">AI-Powered Smart Beekeeping &amp; Honey Traceability</p>
+        <div className="apple-login-header">
+          <div className="apple-login-logo">
+            <svg viewBox="0 0 170 170" width="38" height="38" fill="currentColor">
+              <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.58-7.78-11.65-14.23-6.53-10.43-11.65-21.78-15.35-34.05-3.7-12.27-5.55-23.75-5.55-34.43 0-14.02 3.37-25.75 10.12-35.18 6.75-9.44 15.3-14.28 25.64-14.54 4.58 0 9.8 1.25 15.66 3.75 5.86 2.5 9.74 3.75 11.65 3.75 1.52 0 5.48-1.25 11.87-3.75 6.39-2.5 11.53-3.64 15.44-3.44 8.71.43 16.09 3.37 22.14 8.81 6.05 5.44 10.22 12.18 12.51 20.24-7.83 4.68-11.75 11.31-11.75 19.9 0 7.4 2.83 13.7 8.5 18.92 5.66 5.22 12.39 8.16 20.19 8.82-1.96 5.87-4.13 11.74-6.52 17.61zM119.22 31.81c0-7.18 2.56-13.92 7.68-20.23 5.12-6.31 11.42-10.44 18.91-12.39.43 1.52.65 2.94.65 4.24 0 7.18-2.67 14.03-8.01 20.56-5.33 6.53-11.74 10.33-19.23 11.42z"/>
+            </svg>
+          </div>
+          <h2 className="login-logo">Sign in to ApisAI</h2>
+          <p className="login-tagline">Manage your smart apiary, harvests, and blockchain traceability.</p>
+        </div>
         <form onSubmit={login}>
-          <label className="field-label">Email</label>
-          <input className="field-input" type="email" placeholder="admin@apis.ai" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" />
-          <label className="field-label">Password</label>
-          <input className="field-input" type="password" placeholder="••••••••" value={pass} onChange={e => setPass(e.target.value)} autoComplete="current-password" />
+          <div className="form-field">
+            <label className="field-label">Account</label>
+            <input className="field-input" type="email" placeholder="admin@apis.ai" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" />
+          </div>
+          <div className="form-field">
+            <label className="field-label">Password</label>
+            <input className="field-input" type="password" placeholder="••••••••" value={pass} onChange={e => setPass(e.target.value)} autoComplete="current-password" />
+          </div>
           {loginErr && <div className="login-err">{loginErr}</div>}
-          <button className="login-btn" type="submit">Sign in →</button>
+          <button className="login-btn" type="submit">Continue with Apple ID</button>
         </form>
-        <p className="login-footer">AI-powered apiary automation</p>
+        <p className="login-footer">Protected by End-to-End Encryption &amp; Supabase Auth</p>
       </div>
     </div>
   );
@@ -396,17 +407,56 @@ function App() {
       {/* ── MOBILE OVERLAY ── */}
       {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
 
-      {/* ── SIDEBAR ── */}
+      {/* ── APPLE GLOBAL NAVIGATION BAR ── */}
+      <header className="apple-global-nav">
+        <div className="apple-nav-inner">
+          <div className="apple-brand" onClick={() => setActive("overview")}>
+            <svg className="apple-logo-icon" viewBox="0 0 170 170" width="16" height="16" fill="currentColor">
+              <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.58-7.78-11.65-14.23-6.53-10.43-11.65-21.78-15.35-34.05-3.7-12.27-5.55-23.75-5.55-34.43 0-14.02 3.37-25.75 10.12-35.18 6.75-9.44 15.3-14.28 25.64-14.54 4.58 0 9.8 1.25 15.66 3.75 5.86 2.5 9.74 3.75 11.65 3.75 1.52 0 5.48-1.25 11.87-3.75 6.39-2.5 11.53-3.64 15.44-3.44 8.71.43 16.09 3.37 22.14 8.81 6.05 5.44 10.22 12.18 12.51 20.24-7.83 4.68-11.75 11.31-11.75 19.9 0 7.4 2.83 13.7 8.5 18.92 5.66 5.22 12.39 8.16 20.19 8.82-1.96 5.87-4.13 11.74-6.52 17.61zM119.22 31.81c0-7.18 2.56-13.92 7.68-20.23 5.12-6.31 11.42-10.44 18.91-12.39.43 1.52.65 2.94.65 4.24 0 7.18-2.67 14.03-8.01 20.56-5.33 6.53-11.74 10.33-19.23 11.42z"/>
+            </svg>
+            <span className="apple-brand-title">ApisAI</span>
+            <span className="apple-tag-pill">Pro</span>
+          </div>
+
+          <nav className="apple-nav-items">
+            {NAV.map(n => (
+              <button
+                key={n.id}
+                className={"apple-nav-link" + (active === n.id ? " active" : "")}
+                onClick={() => setActive(n.id)}
+              >
+                {n.label}
+              </button>
+            ))}
+          </nav>
+
+          <div className="apple-nav-right">
+            <div className={"apple-live-status" + (status === "Connected" ? " ok" : "")}>
+              <span className="status-dot-pulse" />
+              <span>{status}</span>
+            </div>
+            <button className="apple-hamburger" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Menu">
+              <span /><span />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* ── MOBILE SLIDE-OUT MENU ── */}
       <aside className={"sidebar" + (sidebarOpen ? " open" : "")}>
         <div className="brand">
-          <div className="brand-icon">A</div>
+          <div className="brand-icon">
+            <svg viewBox="0 0 170 170" width="14" height="14" fill="currentColor">
+              <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.58-7.78-11.65-14.23-6.53-10.43-11.65-21.78-15.35-34.05-3.7-12.27-5.55-23.75-5.55-34.43 0-14.02 3.37-25.75 10.12-35.18 6.75-9.44 15.3-14.28 25.64-14.54 4.58 0 9.8 1.25 15.66 3.75 5.86 2.5 9.74 3.75 11.65 3.75 1.52 0 5.48-1.25 11.87-3.75 6.39-2.5 11.53-3.64 15.44-3.44 8.71.43 16.09 3.37 22.14 8.81 6.05 5.44 10.22 12.18 12.51 20.24-7.83 4.68-11.75 11.31-11.75 19.9 0 7.4 2.83 13.7 8.5 18.92 5.66 5.22 12.39 8.16 20.19 8.82-1.96 5.87-4.13 11.74-6.52 17.61zM119.22 31.81c0-7.18 2.56-13.92 7.68-20.23 5.12-6.31 11.42-10.44 18.91-12.39.43 1.52.65 2.94.65 4.24 0 7.18-2.67 14.03-8.01 20.56-5.33 6.53-11.74 10.33-19.23 11.42z"/>
+            </svg>
+          </div>
           <div>
-            <div className="brand-name">APIS AI</div>
+            <div className="brand-name">ApisAI</div>
             <div className="brand-sub">Smart Apiary Platform</div>
           </div>
         </div>
 
-        <div className="nav-section-label">Workspace</div>
+        <div className="nav-section-label">Navigation</div>
         <nav>
           {NAV.map(n => (
             <button key={n.id} className={"nav-btn" + (active === n.id ? " active" : "")} onClick={() => { setActive(n.id); setSidebarOpen(false); }}>
@@ -420,7 +470,7 @@ function App() {
           <div className="ai-pill">
             <span className="pulse-dot" />
             <div>
-              <div className="ai-pill-title">AI Assistant</div>
+              <div className="ai-pill-title">Intelligence</div>
               <div className="ai-pill-sub">WhatsApp automation active</div>
             </div>
           </div>
@@ -429,23 +479,22 @@ function App() {
         </div>
       </aside>
 
-      {/* ── MAIN ── */}
+      {/* ── MAIN CONTENT ── */}
       <main className="main">
-        <header className="topbar">
-          <div className="topbar-left">
-            <button className="hamburger" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Menu">
-              <span /><span /><span />
-            </button>
-            <div>
-              <div className="topbar-eye">APIARY DASHBOARD</div>
-              <h1 className="topbar-title">{pageTitle}</h1>
+        {/* Apple Subnav / Breadcrumb bar */}
+        <div className="apple-subnav">
+          <div className="apple-subnav-inner">
+            <div className="apple-breadcrumb">
+              <span className="apple-crumb-app">ApisAI</span>
+              <span className="apple-crumb-sep">/</span>
+              <span className="apple-crumb-page">{pageTitle}</span>
+            </div>
+            <div className="apple-subnav-actions">
+              <span className="apple-system-badge">System 2.4 Active</span>
+              <button className="apple-signout-btn" onClick={logout}>Sign out</button>
             </div>
           </div>
-          <div className={"status-pill" + (status === "Connected" ? " ok" : "")}>
-            <span className="status-dot" />
-            {status}
-          </div>
-        </header>
+        </div>
 
         {/* OVERVIEW */}
         {active === "overview" && (
