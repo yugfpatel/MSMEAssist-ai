@@ -221,8 +221,11 @@ class InvoiceRequest(BaseModel):
 @app.post("/invoice/generate")
 def generate_invoice_endpoint(invoice: InvoiceRequest):
     import base64
+    b_name = invoice.business_name or "ApisAI"
+    if "msme" in b_name.lower():
+        b_name = "ApisAI"
     result = generate_invoice(
-        business_name=invoice.business_name,
+        business_name=b_name,
         customer_name=invoice.customer_name,
         items=[item.model_dump() for item in invoice.items],
         gst_percent=invoice.gst_percent,

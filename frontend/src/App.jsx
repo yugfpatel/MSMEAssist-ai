@@ -261,10 +261,12 @@ function InvoicesTable({ invoices, onDelete }) {
         {invoices.map((inv, i) => {
           const status = (inv.status || "unknown").toLowerCase();
           const url = inv.invoice_url || inv.file_url || inv.url;
+          const cleanCustomer = (inv.customer_name || inv.customer || "Direct Customer").replace(/msme(\s*assist)?(\s*ai)?/gi, "ApisAI");
+          const cleanInvNum = (inv.invoice_number || inv.invoice_id || inv.id || "—").replace(/msme(\s*assist)?(\s*ai)?/gi, "ApisAI");
           return (
             <tr key={inv.id || `inv-${i}`}>
-              <td className="mono">{inv.invoice_number || inv.invoice_id || inv.id || "—"}</td>
-              <td>{inv.customer_name || inv.customer || "—"}</td>
+              <td className="mono">{cleanInvNum}</td>
+              <td>{cleanCustomer}</td>
               <td><strong>{fmt(inv.total ?? inv.amount)}</strong></td>
               <td><span className={`badge badge-${status}`}>{inv.status || "Unknown"}</span></td>
               <td>
@@ -398,7 +400,7 @@ function SettingsView({ business }) {
       <div className="panel" style={{ maxWidth: 780 }}>
         <div className="panel-hd">
           <span className="panel-title">Apiary Business Profile</span>
-          <span className="panel-sub">Verified MSME Account</span>
+          <span className="panel-sub">Active Apiary Workspace</span>
         </div>
         <form onSubmit={handleSave} style={{ padding: "24px 26px" }}>
           {saved && (
@@ -470,7 +472,9 @@ function SettingsView({ business }) {
 
 /* ─── MAIN APP COMPONENT ──────────────────────────── */
 function App() {
-  const [loggedIn, setLoggedIn] = useState(localStorage.getItem("msmeassist_logged_in") === "true");
+  const [loggedIn, setLoggedIn] = useState(
+    localStorage.getItem("apisai_logged_in") === "true" || localStorage.getItem("msmeassist_logged_in") === "true"
+  );
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [loginErr, setLoginErr] = useState("");
@@ -580,7 +584,8 @@ function App() {
   function login(e) {
     e.preventDefault();
     if (email === "admin@apis.ai" && pass === "apisai") {
-      localStorage.setItem("msmeassist_logged_in", "true");
+      localStorage.setItem("apisai_logged_in", "true");
+      localStorage.removeItem("msmeassist_logged_in");
       setLoggedIn(true);
     } else {
       setLoginErr("Invalid email or password");
@@ -588,6 +593,7 @@ function App() {
   }
 
   function logout() {
+    localStorage.removeItem("apisai_logged_in");
     localStorage.removeItem("msmeassist_logged_in");
     setLoggedIn(false);
   }
@@ -640,13 +646,17 @@ function App() {
     <div className="login-screen">
       <div className="login-card">
         <div className="apple-login-header">
-          <div className="apple-login-logo">
-            <svg role="img" aria-label="Apple Insignia" viewBox="0 0 170 170" width="38" height="38" fill="currentColor">
-              <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.58-7.78-11.65-14.23-6.53-10.43-11.65-21.78-15.35-34.05-3.7-12.27-5.55-23.75-5.55-34.43 0-14.02 3.37-25.75 10.12-35.18 6.75-9.44 15.3-14.28 25.64-14.54 4.58 0 9.8 1.25 15.66 3.75 5.86 2.5 9.74 3.75 11.65 3.75 1.52 0 5.48-1.25 11.87-3.75 6.39-2.5 11.53-3.64 15.44-3.44 8.71.43 16.09 3.37 22.14 8.81 6.05 5.44 10.22 12.18 12.51 20.24-7.83 4.68-11.75 11.31-11.75 19.9 0 7.4 2.83 13.7 8.5 18.92 5.66 5.22 12.39 8.16 20.19 8.82-1.96 5.87-4.13 11.74-6.52 17.61zM119.22 31.81c0-7.18 2.56-13.92 7.68-20.23 5.12-6.31 11.42-10.44 18.91-12.39.43 1.52.65 2.94.65 4.24 0 7.18-2.67 14.03-8.01 20.56-5.33 6.53-11.74 10.33-19.23 11.42z"/>
+          <div className="apple-login-logo" style={{ display: "flex", justifyContent: "center", marginBottom: 14 }}>
+            <svg role="img" aria-label="ApisAI Insignia" viewBox="0 0 64 64" width="46" height="46" fill="none">
+              <path d="M32 10L49 20V40L32 50L15 40V20L32 10Z" stroke="#f5f5f7" strokeWidth="2.5" strokeLinejoin="round" fill="rgba(255,255,255,0.06)" />
+              <circle cx="32" cy="30" r="4.5" fill="#f5f5f7" />
+              <line x1="32" y1="10" x2="32" y2="25.5" stroke="#f5f5f7" strokeWidth="2" strokeLinecap="round" />
+              <line x1="15" y1="40" x2="28" y2="32" stroke="#f5f5f7" strokeWidth="2" strokeLinecap="round" />
+              <line x1="49" y1="40" x2="36" y2="32" stroke="#f5f5f7" strokeWidth="2" strokeLinecap="round" />
             </svg>
           </div>
           <h1 className="login-logo">Sign in to ApisAI</h1>
-          <p className="login-tagline">Manage your smart apiary, harvests, and blockchain traceability.</p>
+          <p className="login-tagline">Smart Apiary &amp; Honey Traceability Platform</p>
         </div>
         <form onSubmit={login}>
           <div className="form-field">
@@ -658,9 +668,9 @@ function App() {
             <input className="field-input" type="password" placeholder="••••••••" value={pass} onChange={e => setPass(e.target.value)} autoComplete="current-password" required />
           </div>
           {loginErr && <div className="login-err">{loginErr}</div>}
-          <button className="login-btn" type="submit">Continue with Apple ID</button>
+          <button className="login-btn" type="submit">Sign in to ApisAI →</button>
         </form>
-        <p className="login-footer">Protected by End-to-End Encryption &amp; Supabase Auth</p>
+        <p className="login-footer">ApisAI Smart Apiary Platform</p>
       </div>
     </div>
   );
@@ -672,15 +682,18 @@ function App() {
       {/* ── MOBILE OVERLAY ── */}
       {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
 
-      {/* ── APPLE GLOBAL NAVIGATION BAR ── */}
+      {/* ── GLOBAL NAVIGATION BAR ── */}
       <header className="apple-global-nav">
         <div className="apple-nav-inner">
           <div className="apple-brand" onClick={() => navigateTo("/overview")}>
-            <svg role="img" aria-label="ApisAI Logo" className="apple-logo-icon" viewBox="0 0 170 170" width="16" height="16" fill="currentColor">
-              <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.58-7.78-11.65-14.23-6.53-10.43-11.65-21.78-15.35-34.05-3.7-12.27-5.55-23.75-5.55-34.43 0-14.02 3.37-25.75 10.12-35.18 6.75-9.44 15.3-14.28 25.64-14.54 4.58 0 9.8 1.25 15.66 3.75 5.86 2.5 9.74 3.75 11.65 3.75 1.52 0 5.48-1.25 11.87-3.75 6.39-2.5 11.53-3.64 15.44-3.44 8.71.43 16.09 3.37 22.14 8.81 6.05 5.44 10.22 12.18 12.51 20.24-7.83 4.68-11.75 11.31-11.75 19.9 0 7.4 2.83 13.7 8.5 18.92 5.66 5.22 12.39 8.16 20.19 8.82-1.96 5.87-4.13 11.74-6.52 17.61zM119.22 31.81c0-7.18 2.56-13.92 7.68-20.23 5.12-6.31 11.42-10.44 18.91-12.39.43 1.52.65 2.94.65 4.24 0 7.18-2.67 14.03-8.01 20.56-5.33 6.53-11.74 10.33-19.23 11.42z"/>
+            <svg role="img" aria-label="ApisAI Logo" className="apple-logo-icon" viewBox="0 0 64 64" width="20" height="20" fill="none">
+              <path d="M32 10L49 20V40L32 50L15 40V20L32 10Z" stroke="currentColor" strokeWidth="3" strokeLinejoin="round" fill="rgba(255,255,255,0.06)" />
+              <circle cx="32" cy="30" r="4.5" fill="currentColor" />
+              <line x1="32" y1="10" x2="32" y2="25.5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+              <line x1="15" y1="40" x2="28" y2="32" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+              <line x1="49" y1="40" x2="36" y2="32" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
             </svg>
             <span className="apple-brand-title">ApisAI</span>
-            <span className="apple-tag-pill">Pro</span>
           </div>
 
           <nav className="apple-nav-items" aria-label="Primary Navigation">
@@ -715,8 +728,12 @@ function App() {
       <aside className={"sidebar" + (sidebarOpen ? " open" : "")} aria-label="Mobile Navigation Sidebar">
         <div className="brand">
           <div className="brand-icon">
-            <svg role="img" aria-label="ApisAI Insignia" viewBox="0 0 170 170" width="14" height="14" fill="currentColor">
-              <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.58-7.78-11.65-14.23-6.53-10.43-11.65-21.78-15.35-34.05-3.7-12.27-5.55-23.75-5.55-34.43 0-14.02 3.37-25.75 10.12-35.18 6.75-9.44 15.3-14.28 25.64-14.54 4.58 0 9.8 1.25 15.66 3.75 5.86 2.5 9.74 3.75 11.65 3.75 1.52 0 5.48-1.25 11.87-3.75 6.39-2.5 11.53-3.64 15.44-3.44 8.71.43 16.09 3.37 22.14 8.81 6.05 5.44 10.22 12.18 12.51 20.24-7.83 4.68-11.75 11.31-11.75 19.9 0 7.4 2.83 13.7 8.5 18.92 5.66 5.22 12.39 8.16 20.19 8.82-1.96 5.87-4.13 11.74-6.52 17.61zM119.22 31.81c0-7.18 2.56-13.92 7.68-20.23 5.12-6.31 11.42-10.44 18.91-12.39.43 1.52.65 2.94.65 4.24 0 7.18-2.67 14.03-8.01 20.56-5.33 6.53-11.74 10.33-19.23 11.42z"/>
+            <svg role="img" aria-label="ApisAI Insignia" viewBox="0 0 64 64" width="16" height="16" fill="none">
+              <path d="M32 10L49 20V40L32 50L15 40V20L32 10Z" stroke="#000000" strokeWidth="3.5" strokeLinejoin="round" />
+              <circle cx="32" cy="30" r="4.5" fill="#000000" />
+              <line x1="32" y1="10" x2="32" y2="25.5" stroke="#000000" strokeWidth="3" strokeLinecap="round" />
+              <line x1="15" y1="40" x2="28" y2="32" stroke="#000000" strokeWidth="3" strokeLinecap="round" />
+              <line x1="49" y1="40" x2="36" y2="32" stroke="#000000" strokeWidth="3" strokeLinecap="round" />
             </svg>
           </div>
           <div>
@@ -760,7 +777,7 @@ function App() {
 
       {/* ── MAIN CONTENT ── */}
       <main className="main">
-        {/* Apple Subnav / Breadcrumb bar */}
+        {/* Subnav / Breadcrumb bar */}
         <div className="apple-subnav">
           <div className="apple-subnav-inner">
             <nav className="apple-breadcrumb" aria-label="Breadcrumb">
@@ -778,7 +795,6 @@ function App() {
               >
                 Settings
               </button>
-              <span className="apple-system-badge">System 2.4 Active</span>
               <button className="apple-signout-btn" onClick={logout}>Sign out</button>
             </div>
           </div>
@@ -851,7 +867,7 @@ function App() {
         {/* INVOICES */}
         {active === "invoices" && (
           <Page title="Invoices &amp; Billing" subtitle="Generate and download compliant PDF invoices with automated GST calculations.">
-            <InvoiceGenerator products={products} business={business} />
+            <InvoiceGenerator products={products} />
             <div className="panel"><InvoicesTable invoices={invoices} onDelete={deleteInvoice} /></div>
           </Page>
         )}
@@ -916,7 +932,7 @@ function App() {
 }
 
 /* ─── invoice generator ───────────────────────────── */
-function InvoiceGenerator({ products, business }) {
+function InvoiceGenerator({ products }) {
   const [customer, setCustomer] = useState("");
   const [items, setItems] = useState([{ name: "", quantity: 1, price: "" }]);
   const [gst, setGst] = useState(0);
@@ -963,7 +979,7 @@ function InvoiceGenerator({ products, business }) {
     setGenerating(true);
     try {
       const res = await API.post("/invoice/generate", {
-        business_name: business?.name || "Golden Hive Honey Farm",
+        business_name: "ApisAI",
         customer_name: customer.trim(),
         items: validItems.map(it => ({ name: it.name.trim(), quantity: Number(it.quantity) || 1, price: Number(it.price) })),
         gst_percent: Number(gst) || 0,
@@ -996,8 +1012,8 @@ function InvoiceGenerator({ products, business }) {
   return (
     <div className="panel">
       <div className="panel-hd">
-        <span className="panel-title">Generate PDF Invoice</span>
-        <span className="panel-sub">Tax Compliant Billing</span>
+        <span className="panel-title">Generate ApisAI PDF Invoice</span>
+        <span className="panel-sub">ApisAI Billing Engine</span>
       </div>
       <form onSubmit={generate} style={{ padding: "20px 24px" }}>
         {error && <div className="form-err">{error}</div>}
@@ -1013,8 +1029,8 @@ function InvoiceGenerator({ products, business }) {
             <input className="field-input" placeholder="e.g. Ramesh Kumar" value={customer} onChange={e => setCustomer(e.target.value)} required />
           </div>
           <div className="form-field">
-            <label className="field-label">Apiary Business</label>
-            <input className="field-input" value={business?.name || "Golden Hive Honey Farm"} disabled style={{ opacity: 0.6 }} />
+            <label className="field-label">Platform / Issuer</label>
+            <input className="field-input" value="ApisAI" disabled style={{ opacity: 0.85, color: "#ffffff", fontWeight: 600 }} />
           </div>
         </div>
 
