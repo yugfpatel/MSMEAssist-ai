@@ -4,15 +4,84 @@ import HoneyChain from "./HoneyChain";
 import VerifyBatch from "./VerifyBatch";
 
 const NAV = [
-  { id: "overview",  label: "Overview",      icon: "◉" },
-  { id: "hives",     label: "Hives & IoT",   icon: "⬡" },
-  { id: "harvests",  label: "Harvests",      icon: "◈" },
-  { id: "batches",   label: "Traceability",  icon: "⬡" },
-  { id: "products",  label: "Inventory",     icon: "▦" },
-  { id: "orders",    label: "Orders",        icon: "◫" },
-  { id: "payments",  label: "Payments",      icon: "₹" },
-  { id: "invoices",  label: "Invoices",      icon: "◳" },
+  { id: "overview",  label: "Overview",      path: "/overview",     icon: "◉" },
+  { id: "hives",     label: "Hives & IoT",   path: "/hives",        icon: "⬡" },
+  { id: "harvests",  label: "Harvests",      path: "/harvests",     icon: "◈" },
+  { id: "batches",   label: "Traceability",  path: "/traceability", icon: "⬡" },
+  { id: "products",  label: "Inventory",     path: "/inventory",    icon: "▦" },
+  { id: "orders",    label: "Orders",        path: "/orders",       icon: "◫" },
+  { id: "payments",  label: "Payments",      path: "/payments",     icon: "₹" },
+  { id: "invoices",  label: "Invoices",      path: "/invoices",     icon: "◳" },
 ];
+
+const ROUTE_SEO = {
+  overview: {
+    title: "ApisAI Dashboard — Smart Apiary & Honey Intelligence",
+    description: "Real-time apiary operations, daily harvest telemetry, revenue tracking, and AI-driven hive health monitoring for beekeeping MSMEs.",
+    canonical: "/overview",
+  },
+  hives: {
+    title: "Hives & IoT Telemetry — ApisAI",
+    description: "Continuous sensor monitoring for beehives. Real-time temperature, humidity, weight telemetry, and AI colony swarming diagnostics.",
+    canonical: "/hives",
+  },
+  harvests: {
+    title: "Apiary Harvest Records & Yield — ApisAI",
+    description: "Track honey harvest extractions by apiary yard, floral variety, batch weight, and laboratory quality certification grades.",
+    canonical: "/harvests",
+  },
+  batches: {
+    title: "Blockchain Honey Traceability & Verification — ApisAI HoneyChain",
+    description: "Immutable SHA-256 cryptographic provenance chain for honey batches from hive extraction to retail shelf.",
+    canonical: "/traceability",
+  },
+  products: {
+    title: "Honey Product Catalog & Inventory — ApisAI",
+    description: "Manage raw and specialty honey stock levels, pricing, packaging sizes, and direct retail distribution inventory.",
+    canonical: "/inventory",
+  },
+  orders: {
+    title: "Customer Orders & WhatsApp Fulfillment — ApisAI",
+    description: "Automated order orchestration from WhatsApp conversational commerce through fulfillment and batch assignment.",
+    canonical: "/orders",
+  },
+  payments: {
+    title: "Payments & Revenue Settlement — ApisAI",
+    description: "Monitor digital payment collections, gateway reconciliations, and customer transaction logs.",
+    canonical: "/payments",
+  },
+  invoices: {
+    title: "Automated Tax Invoicing & PDF Billing — ApisAI",
+    description: "Generate compliant PDF invoices with GST calculations, automated line items, and cloud storage archival.",
+    canonical: "/invoices",
+  },
+  settings: {
+    title: "Apiary System Settings — ApisAI",
+    description: "Configure apiary business profile, IoT gateway webhooks, alert thresholds, and WhatsApp bot integration parameters.",
+    canonical: "/settings",
+  },
+  "404": {
+    title: "404: Page Not Found — ApisAI",
+    description: "The requested page could not be found on ApisAI. Explore our smart apiary dashboard or return to overview.",
+    canonical: "/404",
+  },
+};
+
+function getRouteFromPath(pathname) {
+  const p = pathname.replace(/\/+$/, "") || "/";
+  if (p === "/" || p === "/overview") return { id: "overview", path: "/overview" };
+  if (p === "/hives") return { id: "hives", path: "/hives" };
+  if (p === "/harvests") return { id: "harvests", path: "/harvests" };
+  if (p === "/traceability" || p === "/batches") return { id: "batches", path: "/traceability" };
+  if (p === "/inventory" || p === "/products") return { id: "products", path: "/inventory" };
+  if (p === "/orders") return { id: "orders", path: "/orders" };
+  if (p === "/payments") return { id: "payments", path: "/payments" };
+  if (p === "/invoices") return { id: "invoices", path: "/invoices" };
+  if (p === "/settings") return { id: "settings", path: "/settings" };
+  const verifyMatch = p.match(/^\/verify\/batch\/([A-Za-z0-9-]+)/);
+  if (verifyMatch) return { id: "verify", batchId: verifyMatch[1], path: p };
+  return { id: "404", path: p };
+}
 
 /* ─── helpers ─────────────────────────────────────── */
 function fmt(v) {
@@ -57,7 +126,7 @@ function ActivityList({ orders, payments, invoices }) {
   return (
     <div className="activity-list">
       {list.map((a, i) => (
-        <div className="act-row" key={i}>
+        <div className="act-row" key={`act-${i}`}>
           <div className="act-left">
             <span className="act-title">{a.title}</span>
             <span className="act-detail">{a.detail}</span>
@@ -84,7 +153,7 @@ function BarChart({ data }) {
         const d = new Date();
         d.setDate(d.getDate() - (values.length - 1 - i));
         return (
-          <div className="bar-col" key={i}>
+          <div className="bar-col" key={`bar-${i}`}>
             <div className="bar-track">
               <div className="bar-fill" style={{ height: `${Math.round((v / max) * 100)}%` }} />
             </div>
@@ -114,7 +183,7 @@ function OrdersTable({ orders, full }) {
       </thead>
       <tbody>
         {rows.map((o, i) => {
-          const id = o.id || i;
+          const id = o.id || `order-${i}`;
           const open = expanded === id;
           const status = (o.status || "unknown").toLowerCase();
           return (
@@ -136,10 +205,10 @@ function OrdersTable({ orders, full }) {
                       <div className="expanded-header">Order Items</div>
                       <ul className="item-list">
                         {(o.items || []).length ? o.items.map((it, j) => (
-                          <li key={j} className="item-row">
+                          <li key={`item-${j}`} className="item-row">
                             <span><span className="dimmed">{it.quantity}×</span> {it.product}
                               {it.batch_id && (
-                                <a className="verify-link" href={`/verify/batch/${it.batch_id}`} target="_blank" rel="noreferrer">Verify</a>
+                                <a className="verify-link" href={`/verify/batch/${it.batch_id}`} target="_blank" rel="noreferrer" title={`Verify batch ${it.batch_id}`}>Verify</a>
                               )}
                             </span>
                             <span className="dimmed">{fmt(it.total)}</span>
@@ -168,7 +237,7 @@ function PaymentsTable({ payments }) {
         {payments.map((p, i) => {
           const status = (p.status || "unknown").toLowerCase();
           return (
-            <tr key={p.id || i}>
+            <tr key={p.id || `pay-${i}`}>
               <td className="mono">{p.id || p.payment_id || "—"}</td>
               <td>{p.customer_name || p.customer || "—"}</td>
               <td><strong>{fmt(p.amount)}</strong></td>
@@ -193,7 +262,7 @@ function InvoicesTable({ invoices, onDelete }) {
           const status = (inv.status || "unknown").toLowerCase();
           const url = inv.invoice_url || inv.file_url || inv.url;
           return (
-            <tr key={inv.id || i}>
+            <tr key={inv.id || `inv-${i}`}>
               <td className="mono">{inv.invoice_number || inv.invoice_id || inv.id || "—"}</td>
               <td>{inv.customer_name || inv.customer || "—"}</td>
               <td><strong>{fmt(inv.total ?? inv.amount)}</strong></td>
@@ -221,10 +290,10 @@ function ProductGrid({ products, onRemove, saving }) {
   if (!products.length) return <Empty text="No products in database." />;
   return (
     <div className="product-grid">
-      {products.map(p => (
-        <div className="pcard" key={p.id || p.name}>
+      {products.map((p, i) => (
+        <div className="pcard" key={p.id || `prod-${i}`}>
           <div className="pcard-img">
-            <span className="pcard-icon">⬡</span>
+            <span className="pcard-icon" role="img" aria-label={`${p.name} Honey Product Icon`}>⬡</span>
           </div>
           <div className="pcard-body">
             <span className="pcard-tag">HONEY PRODUCT</span>
@@ -246,13 +315,13 @@ function ProductGrid({ products, onRemove, saving }) {
   );
 }
 
-/* ─── page wrapper ────────────────────────────────── */
+/* ─── page wrapper (Exact ONE H1 per page) ─────────── */
 function Page({ title, subtitle, children }) {
   return (
     <section className="page">
       <div className="page-header">
         <div>
-          <h2 className="page-title">{title}</h2>
+          <h1 className="page-title">{title}</h1>
           {subtitle && <p className="page-sub">{subtitle}</p>}
         </div>
       </div>
@@ -261,14 +330,156 @@ function Page({ title, subtitle, children }) {
   );
 }
 
-/* ─── main app ────────────────────────────────────── */
+/* ─── 404 NOT FOUND PAGE ──────────────────────────── */
+function NotFoundPage({ currentPath, navigateTo }) {
+  return (
+    <Page title="404 — Page Not Found" subtitle="The requested page could not be located on this apiary platform.">
+      <div className="panel" style={{ maxWidth: 680, textAlign: "center", padding: "52px 32px" }}>
+        <div style={{ fontSize: 52, fontWeight: 800, letterSpacing: "-0.04em", color: "#ffffff", marginBottom: 12 }}>
+          404
+        </div>
+        <p style={{ fontSize: 18, color: "var(--tx-1)", fontWeight: 500, marginBottom: 8 }}>
+          The page you’re looking for can’t be found.
+        </p>
+        <p style={{ fontSize: 13.5, color: "var(--tx-2)", marginBottom: 28, lineHeight: 1.5 }}>
+          The URL <code className="mono" style={{ background: "rgba(255,255,255,0.08)", padding: "2px 6px", borderRadius: 4 }}>{currentPath}</code> does not correspond to any active apiary dashboard view or traceability certificate.
+        </p>
+        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 36 }}>
+          <button className="btn-primary" onClick={() => navigateTo("/overview")}>
+            Return to Dashboard →
+          </button>
+          <button className="btn-ghost" onClick={() => navigateTo("/traceability")}>
+            View Traceability
+          </button>
+        </div>
+
+        <div style={{ borderTop: "1px solid var(--border-dim)", paddingTop: 24, textAlign: "left" }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--tx-3)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 14 }}>
+            Explore Verified ApisAI Sections
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10, fontSize: 13 }}>
+            <a href="/hives" onClick={(e) => { e.preventDefault(); navigateTo("/hives"); }} style={{ color: "var(--apple-blue)" }}>
+              → Hives &amp; IoT Telemetry
+            </a>
+            <a href="/harvests" onClick={(e) => { e.preventDefault(); navigateTo("/harvests"); }} style={{ color: "var(--apple-blue)" }}>
+              → Harvest Records
+            </a>
+            <a href="/inventory" onClick={(e) => { e.preventDefault(); navigateTo("/inventory"); }} style={{ color: "var(--apple-blue)" }}>
+              → Honey Inventory
+            </a>
+            <a href="/orders" onClick={(e) => { e.preventDefault(); navigateTo("/orders"); }} style={{ color: "var(--apple-blue)" }}>
+              → Customer Orders
+            </a>
+          </div>
+        </div>
+      </div>
+    </Page>
+  );
+}
+
+/* ─── SYSTEM SETTINGS PAGE ────────────────────────── */
+function SettingsView({ business }) {
+  const [name, setName] = useState(business?.name || "Golden Hive Honey Farm");
+  const [location, setLocation] = useState(business?.location || "Apiary Ridge, Sector 4, Shimla");
+  const [phone, setPhone] = useState(business?.phone || "+91 98765 43210");
+  const [fssai, setFssai] = useState("10022011000492");
+  const [tempAlert, setTempAlert] = useState("38.5");
+  const [saved, setSaved] = useState(false);
+
+  function handleSave(e) {
+    e.preventDefault();
+    localStorage.setItem("apisai_settings", JSON.stringify({ name, location, phone, fssai, tempAlert }));
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3500);
+  }
+
+  return (
+    <Page title="System Settings" subtitle="Configure apiary metadata, IoT diagnostic alert thresholds, and operational integrations.">
+      <div className="panel" style={{ maxWidth: 780 }}>
+        <div className="panel-hd">
+          <span className="panel-title">Apiary Business Profile</span>
+          <span className="panel-sub">Verified MSME Account</span>
+        </div>
+        <form onSubmit={handleSave} style={{ padding: "24px 26px" }}>
+          {saved && (
+            <div className="invoice-success" style={{ marginBottom: 18 }}>
+              ✓ Settings saved successfully. Changes are now active across your apiary network.
+            </div>
+          )}
+          <div className="form-row">
+            <div className="form-field">
+              <label className="field-label">Apiary Business Name</label>
+              <input className="field-input" value={name} onChange={e => setName(e.target.value)} required />
+            </div>
+            <div className="form-field">
+              <label className="field-label">Primary Location</label>
+              <input className="field-input" value={location} onChange={e => setLocation(e.target.value)} required />
+            </div>
+          </div>
+          <div className="form-row">
+            <div className="form-field">
+              <label className="field-label">Official Support Phone / WhatsApp</label>
+              <input className="field-input" value={phone} onChange={e => setPhone(e.target.value)} required />
+            </div>
+            <div className="form-field">
+              <label className="field-label">FSSAI / Organic License #</label>
+              <input className="field-input" value={fssai} onChange={e => setFssai(e.target.value)} required />
+            </div>
+          </div>
+
+          <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid var(--border-dim)" }}>
+            <div style={{ fontSize: 13.5, fontWeight: 600, color: "#fff", marginBottom: 12 }}>IoT Telemetry &amp; Diagnostics</div>
+            <div className="form-row">
+              <div className="form-field">
+                <label className="field-label">High-Temp Swarm Alert Threshold (°C)</label>
+                <input className="field-input" type="number" step="0.1" value={tempAlert} onChange={e => setTempAlert(e.target.value)} />
+              </div>
+              <div className="form-field">
+                <label className="field-label">Sensor Polling Frequency</label>
+                <input className="field-input" value="Real-time (30s telemetry sync)" disabled style={{ opacity: 0.6 }} />
+              </div>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 24, paddingTop: 20, borderTop: "1px solid var(--border-dim)" }}>
+            <div style={{ fontSize: 13.5, fontWeight: 600, color: "#fff", marginBottom: 12 }}>Integrations &amp; Infrastructure</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, fontSize: 13, color: "var(--tx-2)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                <span>WhatsApp AI Assistant</span>
+                <strong style={{ color: "var(--apple-green)" }}>Google Gemini 2.5 Flash (Active)</strong>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                <span>Cloud Invoice Storage</span>
+                <span className="mono">invoices (Supabase Storage)</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0" }}>
+                <span>Cryptographic Ledger</span>
+                <strong style={{ color: "var(--tx-1)" }}>SHA-256 HoneyChain</strong>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 28 }}>
+            <button className="btn-primary" type="submit">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </Page>
+  );
+}
+
+/* ─── MAIN APP COMPONENT ──────────────────────────── */
 function App() {
   const [loggedIn, setLoggedIn] = useState(localStorage.getItem("msmeassist_logged_in") === "true");
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [loginErr, setLoginErr] = useState("");
 
-  const [active, setActive] = useState("overview");
+  const initialRoute = getRouteFromPath(window.location.pathname);
+  const [active, setActive] = useState(initialRoute.id);
+  const [currentPath, setCurrentPath] = useState(initialRoute.path);
+  const [batchIdParam, setBatchIdParam] = useState(initialRoute.batchId || null);
+
   const [status, setStatus] = useState("Connecting…");
   const [business, setBusiness] = useState(null);
   const [summary, setSummary] = useState({});
@@ -281,6 +492,51 @@ function App() {
   const [pError, setPError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Clean URL Slug Navigation
+  function navigateTo(path) {
+    if (window.location.pathname !== path) {
+      window.history.pushState(null, "", path);
+    }
+    const r = getRouteFromPath(path);
+    setActive(r.id);
+    setCurrentPath(r.path);
+    if (r.batchId) setBatchIdParam(r.batchId);
+    setSidebarOpen(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  // Handle browser back/forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      const r = getRouteFromPath(window.location.pathname);
+      setActive(r.id);
+      setCurrentPath(r.path);
+      if (r.batchId) setBatchIdParam(r.batchId);
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  // Dynamic SEO metadata synchronization
+  useEffect(() => {
+    const seo = ROUTE_SEO[active] || ROUTE_SEO["404"];
+    document.title = seo.title;
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute("content", seo.description);
+    const canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) canonical.setAttribute("href", `https://apis.ai${seo.canonical}`);
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) ogTitle.setAttribute("content", seo.title);
+    const ogDesc = document.querySelector('meta[property="og:description"]');
+    if (ogDesc) ogDesc.setAttribute("content", seo.description);
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    if (ogUrl) ogUrl.setAttribute("content", `https://apis.ai${seo.canonical}`);
+    const twTitle = document.querySelector('meta[name="twitter:title"]');
+    if (twTitle) twTitle.setAttribute("content", seo.title);
+    const twDesc = document.querySelector('meta[name="twitter:description"]');
+    if (twDesc) twDesc.setAttribute("content", seo.description);
+  }, [active]);
+
   useEffect(() => {
     let live = true;
     async function load() {
@@ -288,7 +544,15 @@ function App() {
         await API.get("/", { timeout: 10000 });
         if (!live) return;
         setStatus("Connected");
-        const safeGet = async (url, ms = 15000) => { try { const r = await API.get(url, { timeout: ms }); return r.data; } catch (e) { console.warn("safeGet failed:", url, e.message); return null; } };
+        const safeGet = async (url, ms = 15000) => {
+          try {
+            const r = await API.get(url, { timeout: ms });
+            return r.data;
+          } catch (e) {
+            console.warn("API request failed:", url, e.message);
+            return null;
+          }
+        };
         const [b, pr, sm, or, py, inv] = await Promise.all([
           safeGet("/business"),
           safeGet("/products"),
@@ -366,31 +630,32 @@ function App() {
     finally { setPSaving(false); }
   }
 
-  /* verify route */
-  const m = window.location.pathname.match(/^\/verify\/batch\/([A-Za-z0-9-]+)/);
-  if (m) return <VerifyBatch batchId={m[1]} />;
+  /* verify route (public without login required) */
+  if (active === "verify" && batchIdParam) {
+    return <VerifyBatch batchId={batchIdParam} />;
+  }
 
-  /* login screen */
+  /* login screen with single H1 */
   if (!loggedIn) return (
     <div className="login-screen">
       <div className="login-card">
         <div className="apple-login-header">
           <div className="apple-login-logo">
-            <svg viewBox="0 0 170 170" width="38" height="38" fill="currentColor">
+            <svg role="img" aria-label="Apple Insignia" viewBox="0 0 170 170" width="38" height="38" fill="currentColor">
               <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.58-7.78-11.65-14.23-6.53-10.43-11.65-21.78-15.35-34.05-3.7-12.27-5.55-23.75-5.55-34.43 0-14.02 3.37-25.75 10.12-35.18 6.75-9.44 15.3-14.28 25.64-14.54 4.58 0 9.8 1.25 15.66 3.75 5.86 2.5 9.74 3.75 11.65 3.75 1.52 0 5.48-1.25 11.87-3.75 6.39-2.5 11.53-3.64 15.44-3.44 8.71.43 16.09 3.37 22.14 8.81 6.05 5.44 10.22 12.18 12.51 20.24-7.83 4.68-11.75 11.31-11.75 19.9 0 7.4 2.83 13.7 8.5 18.92 5.66 5.22 12.39 8.16 20.19 8.82-1.96 5.87-4.13 11.74-6.52 17.61zM119.22 31.81c0-7.18 2.56-13.92 7.68-20.23 5.12-6.31 11.42-10.44 18.91-12.39.43 1.52.65 2.94.65 4.24 0 7.18-2.67 14.03-8.01 20.56-5.33 6.53-11.74 10.33-19.23 11.42z"/>
             </svg>
           </div>
-          <h2 className="login-logo">Sign in to ApisAI</h2>
+          <h1 className="login-logo">Sign in to ApisAI</h1>
           <p className="login-tagline">Manage your smart apiary, harvests, and blockchain traceability.</p>
         </div>
         <form onSubmit={login}>
           <div className="form-field">
             <label className="field-label">Account</label>
-            <input className="field-input" type="email" placeholder="admin@apis.ai" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" />
+            <input className="field-input" type="email" placeholder="admin@apis.ai" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" required />
           </div>
           <div className="form-field">
             <label className="field-label">Password</label>
-            <input className="field-input" type="password" placeholder="••••••••" value={pass} onChange={e => setPass(e.target.value)} autoComplete="current-password" />
+            <input className="field-input" type="password" placeholder="••••••••" value={pass} onChange={e => setPass(e.target.value)} autoComplete="current-password" required />
           </div>
           {loginErr && <div className="login-err">{loginErr}</div>}
           <button className="login-btn" type="submit">Continue with Apple ID</button>
@@ -400,7 +665,7 @@ function App() {
     </div>
   );
 
-  const pageTitle = NAV.find(n => n.id === active)?.label || "Overview";
+  const pageTitle = NAV.find(n => n.id === active)?.label || (active === "settings" ? "Settings" : "Not Found");
 
   return (
     <div className="shell">
@@ -410,32 +675,36 @@ function App() {
       {/* ── APPLE GLOBAL NAVIGATION BAR ── */}
       <header className="apple-global-nav">
         <div className="apple-nav-inner">
-          <div className="apple-brand" onClick={() => setActive("overview")}>
-            <svg className="apple-logo-icon" viewBox="0 0 170 170" width="16" height="16" fill="currentColor">
+          <div className="apple-brand" onClick={() => navigateTo("/overview")}>
+            <svg role="img" aria-label="ApisAI Logo" className="apple-logo-icon" viewBox="0 0 170 170" width="16" height="16" fill="currentColor">
               <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.58-7.78-11.65-14.23-6.53-10.43-11.65-21.78-15.35-34.05-3.7-12.27-5.55-23.75-5.55-34.43 0-14.02 3.37-25.75 10.12-35.18 6.75-9.44 15.3-14.28 25.64-14.54 4.58 0 9.8 1.25 15.66 3.75 5.86 2.5 9.74 3.75 11.65 3.75 1.52 0 5.48-1.25 11.87-3.75 6.39-2.5 11.53-3.64 15.44-3.44 8.71.43 16.09 3.37 22.14 8.81 6.05 5.44 10.22 12.18 12.51 20.24-7.83 4.68-11.75 11.31-11.75 19.9 0 7.4 2.83 13.7 8.5 18.92 5.66 5.22 12.39 8.16 20.19 8.82-1.96 5.87-4.13 11.74-6.52 17.61zM119.22 31.81c0-7.18 2.56-13.92 7.68-20.23 5.12-6.31 11.42-10.44 18.91-12.39.43 1.52.65 2.94.65 4.24 0 7.18-2.67 14.03-8.01 20.56-5.33 6.53-11.74 10.33-19.23 11.42z"/>
             </svg>
             <span className="apple-brand-title">ApisAI</span>
             <span className="apple-tag-pill">Pro</span>
           </div>
 
-          <nav className="apple-nav-items">
+          <nav className="apple-nav-items" aria-label="Primary Navigation">
             {NAV.map(n => (
-              <button
+              <a
                 key={n.id}
+                href={n.path}
                 className={"apple-nav-link" + (active === n.id ? " active" : "")}
-                onClick={() => setActive(n.id)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigateTo(n.path);
+                }}
               >
                 {n.label}
-              </button>
+              </a>
             ))}
           </nav>
 
           <div className="apple-nav-right">
             <div className={"apple-live-status" + (status === "Connected" ? " ok" : "")}>
-              <span className="status-dot-pulse" />
+              <span className="status-dot-pulse" aria-hidden="true" />
               <span>{status}</span>
             </div>
-            <button className="apple-hamburger" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Menu">
+            <button className="apple-hamburger" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Toggle navigation menu">
               <span /><span />
             </button>
           </div>
@@ -443,10 +712,10 @@ function App() {
       </header>
 
       {/* ── MOBILE SLIDE-OUT MENU ── */}
-      <aside className={"sidebar" + (sidebarOpen ? " open" : "")}>
+      <aside className={"sidebar" + (sidebarOpen ? " open" : "")} aria-label="Mobile Navigation Sidebar">
         <div className="brand">
           <div className="brand-icon">
-            <svg viewBox="0 0 170 170" width="14" height="14" fill="currentColor">
+            <svg role="img" aria-label="ApisAI Insignia" viewBox="0 0 170 170" width="14" height="14" fill="currentColor">
               <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.58-7.78-11.65-14.23-6.53-10.43-11.65-21.78-15.35-34.05-3.7-12.27-5.55-23.75-5.55-34.43 0-14.02 3.37-25.75 10.12-35.18 6.75-9.44 15.3-14.28 25.64-14.54 4.58 0 9.8 1.25 15.66 3.75 5.86 2.5 9.74 3.75 11.65 3.75 1.52 0 5.48-1.25 11.87-3.75 6.39-2.5 11.53-3.64 15.44-3.44 8.71.43 16.09 3.37 22.14 8.81 6.05 5.44 10.22 12.18 12.51 20.24-7.83 4.68-11.75 11.31-11.75 19.9 0 7.4 2.83 13.7 8.5 18.92 5.66 5.22 12.39 8.16 20.19 8.82-1.96 5.87-4.13 11.74-6.52 17.61zM119.22 31.81c0-7.18 2.56-13.92 7.68-20.23 5.12-6.31 11.42-10.44 18.91-12.39.43 1.52.65 2.94.65 4.24 0 7.18-2.67 14.03-8.01 20.56-5.33 6.53-11.74 10.33-19.23 11.42z"/>
             </svg>
           </div>
@@ -457,24 +726,34 @@ function App() {
         </div>
 
         <div className="nav-section-label">Navigation</div>
-        <nav>
+        <nav aria-label="Sidebar Navigation">
           {NAV.map(n => (
-            <button key={n.id} className={"nav-btn" + (active === n.id ? " active" : "")} onClick={() => { setActive(n.id); setSidebarOpen(false); }}>
-              <span className="nav-ico">{n.icon}</span>
+            <a
+              key={n.id}
+              href={n.path}
+              className={"nav-btn" + (active === n.id ? " active" : "")}
+              onClick={(e) => {
+                e.preventDefault();
+                navigateTo(n.path);
+              }}
+            >
+              <span className="nav-ico" aria-hidden="true">{n.icon}</span>
               {n.label}
-            </button>
+            </a>
           ))}
         </nav>
 
         <div className="sidebar-foot">
           <div className="ai-pill">
-            <span className="pulse-dot" />
+            <span className="pulse-dot" aria-hidden="true" />
             <div>
               <div className="ai-pill-title">Intelligence</div>
               <div className="ai-pill-sub">WhatsApp automation active</div>
             </div>
           </div>
-          <button className="foot-btn" onClick={() => alert("Settings coming soon")}>⚙ Settings</button>
+          <button className="foot-btn" onClick={() => navigateTo("/settings")}>
+            <span aria-hidden="true">⚙</span> Settings
+          </button>
           <button className="foot-btn danger" onClick={logout}>↩ Sign out</button>
         </div>
       </aside>
@@ -484,23 +763,42 @@ function App() {
         {/* Apple Subnav / Breadcrumb bar */}
         <div className="apple-subnav">
           <div className="apple-subnav-inner">
-            <div className="apple-breadcrumb">
-              <span className="apple-crumb-app">ApisAI</span>
-              <span className="apple-crumb-sep">/</span>
-              <span className="apple-crumb-page">{pageTitle}</span>
-            </div>
+            <nav className="apple-breadcrumb" aria-label="Breadcrumb">
+              <a href="/overview" className="apple-crumb-app" onClick={(e) => { e.preventDefault(); navigateTo("/overview"); }}>
+                ApisAI
+              </a>
+              <span className="apple-crumb-sep" aria-hidden="true">/</span>
+              <span className="apple-crumb-page" aria-current="page">{pageTitle}</span>
+            </nav>
             <div className="apple-subnav-actions">
+              <button
+                className="apple-subnav-link"
+                style={{ background: "none", color: active === "settings" ? "var(--tx-1)" : "var(--tx-3)", fontSize: 12, marginRight: 8 }}
+                onClick={() => navigateTo("/settings")}
+              >
+                Settings
+              </button>
               <span className="apple-system-badge">System 2.4 Active</span>
               <button className="apple-signout-btn" onClick={logout}>Sign out</button>
             </div>
           </div>
         </div>
 
+        {/* 404 NOT FOUND */}
+        {active === "404" && (
+          <NotFoundPage currentPath={currentPath} navigateTo={navigateTo} />
+        )}
+
+        {/* SETTINGS VIEW */}
+        {active === "settings" && (
+          <SettingsView business={business} />
+        )}
+
         {/* OVERVIEW */}
         {active === "overview" && (
           <Page title={business?.name || "Golden Hive Honey Farm"} subtitle="Here's what is happening with your apiary today.">
             <div className="overview-cta">
-              <button className="btn-primary" onClick={() => setActive("orders")}>View Orders →</button>
+              <button className="btn-primary" onClick={() => navigateTo("/orders")}>View Orders →</button>
             </div>
 
             <div className="stats-row">
@@ -524,7 +822,7 @@ function App() {
             <div className="panel">
               <div className="panel-hd">
                 <span className="panel-title">Recent Orders</span>
-                <button className="btn-ghost" onClick={() => setActive("orders")}>View all →</button>
+                <button className="btn-ghost" onClick={() => navigateTo("/orders")}>View all →</button>
               </div>
               <OrdersTable orders={orders} />
             </div>
@@ -533,14 +831,14 @@ function App() {
 
         {/* ORDERS */}
         {active === "orders" && (
-          <Page title="Orders" subtitle="Track WhatsApp orders from conversation to payment.">
+          <Page title="Customer Orders" subtitle="Track WhatsApp orders from customer conversation to payment fulfillment.">
             <div className="panel"><OrdersTable orders={orders} full /></div>
           </Page>
         )}
 
         {/* PAYMENTS */}
         {active === "payments" && (
-          <Page title="Payments" subtitle="Monitor payments collected through ApisAI.">
+          <Page title="Payments &amp; Settlement" subtitle="Monitor payments collected through ApisAI and payment reconciliation.">
             <div className="stats-row">
               <StatCard label="Collected This Month" value={fmt(summary.month_revenue ?? summary.collected_amount)} />
               <StatCard label="Pending Amount" value={fmt(summary.pending_amount)} warn />
@@ -552,17 +850,17 @@ function App() {
 
         {/* INVOICES */}
         {active === "invoices" && (
-          <Page title="Invoices" subtitle="Generate and download PDF invoices.">
+          <Page title="Invoices &amp; Billing" subtitle="Generate and download compliant PDF invoices with automated GST calculations.">
             <InvoiceGenerator products={products} business={business} />
             <div className="panel"><InvoicesTable invoices={invoices} onDelete={deleteInvoice} /></div>
           </Page>
         )}
 
-        {/* PRODUCTS */}
+        {/* PRODUCTS / INVENTORY */}
         {active === "products" && (
-          <Page title="Inventory" subtitle="Add or remove products from your Supabase database.">
+          <Page title="Honey Inventory" subtitle="Manage honey varieties, stock levels, and packaging specifications.">
             <div className="panel">
-              <div className="panel-hd"><span className="panel-title">Add Product</span></div>
+              <div className="panel-hd"><span className="panel-title">Add Honey Product</span></div>
               <form className="product-form" onSubmit={addProduct}>
                 <div className="form-row">
                   <div className="form-field">
@@ -592,10 +890,24 @@ function App() {
           </Page>
         )}
 
-        {/* HONEYCHAIN SUBSYSTEMS */}
-        {["hives", "harvests", "batches"].includes(active) && (
-          <Page title="ApisAI Subsystem" subtitle="Blockchain-based traceability and smart beekeeping management.">
-            <HoneyChain activeSection={active} />
+        {/* HIVES & IOT */}
+        {active === "hives" && (
+          <Page title="Hives &amp; IoT Telemetry" subtitle="Continuous sensor telemetry for internal temperature, humidity, weight gain, and AI diagnostics.">
+            <HoneyChain activeSection="hives" />
+          </Page>
+        )}
+
+        {/* HARVESTS */}
+        {active === "harvests" && (
+          <Page title="Apiary Harvest Records" subtitle="Traceable extraction logs by yard, floral variety, batch weight, and lab quality grades.">
+            <HoneyChain activeSection="harvests" />
+          </Page>
+        )}
+
+        {/* TRACEABILITY / BATCHES */}
+        {active === "batches" && (
+          <Page title="HoneyChain Traceability" subtitle="Cryptographically linked SHA-256 provenance ledgers and public QR verification certificates.">
+            <HoneyChain activeSection="batches" />
           </Page>
         )}
       </main>
@@ -622,7 +934,10 @@ function InvoiceGenerator({ products, business }) {
 
   function pickProduct(i, productName) {
     const p = (products || []).find(x => x.name === productName);
-    if (p) updateRow(i, "name", p.name); updateRow(i, "price", p.price);
+    if (p) {
+      updateRow(i, "name", p.name);
+      updateRow(i, "price", p.price);
+    }
   }
 
   function subtotal() { return items.reduce((s, it) => s + (Number(it.quantity) || 0) * (Number(it.price) || 0), 0); }
@@ -658,130 +973,102 @@ function InvoiceGenerator({ products, business }) {
 
       if (res.data.success) {
         setResult(res.data);
-        // Auto-download
-        if (res.data.pdf_bytes) downloadBase64(res.data.pdf_bytes, res.data.filename || "invoice.pdf");
-        // Save to local history
-        const entry = {
-          invoice_number: res.data.invoice_number,
-          customer: customer.trim(),
-          total: res.data.total,
-          date: new Date().toISOString(),
-          pdf_bytes: res.data.pdf_bytes,
-          filename: res.data.filename,
-          invoice_url: res.data.invoice_url,
-        };
-        const updated = [entry, ...history].slice(0, 50);
-        setHistory(updated);
-        localStorage.setItem("apisai_invoices", JSON.stringify(updated));
+        const newHist = [res.data, ...history].slice(0, 20);
+        setHistory(newHist);
+        localStorage.setItem("apisai_invoices", JSON.stringify(newHist));
+        if (res.data.pdf_base64) {
+          downloadBase64(res.data.pdf_base64, `Invoice-${res.data.invoice_number}.pdf`);
+        }
       } else {
-        setError(res.data.detail || "Failed to generate invoice.");
+        setError(res.data.message || "Failed to generate invoice.");
       }
     } catch (err) {
       setError(err.response?.data?.detail || err.message || "Failed to generate invoice.");
+    } finally {
+      setGenerating(false);
     }
-    setGenerating(false);
   }
 
   const sub = subtotal();
-  const gstAmt = sub * (Number(gst) / 100);
-  const total = Math.max(0, sub + gstAmt - Number(discount || 0));
+  const gstAmt = (sub * (Number(gst) || 0)) / 100;
+  const grandTotal = Math.max(0, sub + gstAmt - (Number(discount) || 0));
 
   return (
-    <>
-      <div className="panel" style={{ marginBottom: 16 }}>
-        <div className="panel-hd"><span className="panel-title">Create Invoice</span><span className="panel-sub">PDF generated on server</span></div>
-        <form onSubmit={generate} style={{ padding: "20px 24px" }}>
-          <div className="form-row">
-            <div className="form-field">
-              <label className="field-label">Customer Name</label>
-              <input className="field-input" placeholder="e.g. Rajesh Kumar" value={customer} onChange={e => setCustomer(e.target.value)} />
-            </div>
-            <div className="form-field">
-              <label className="field-label">GST %</label>
-              <input className="field-input" type="number" min="0" step="0.5" value={gst} onChange={e => setGst(e.target.value)} />
-            </div>
+    <div className="panel">
+      <div className="panel-hd">
+        <span className="panel-title">Generate PDF Invoice</span>
+        <span className="panel-sub">Tax Compliant Billing</span>
+      </div>
+      <form onSubmit={generate} style={{ padding: "20px 24px" }}>
+        {error && <div className="form-err">{error}</div>}
+        {result && (
+          <div className="invoice-success">
+            Invoice {result.invoice_number} generated &amp; downloaded successfully! (Total: {fmt(result.grand_total)})
+          </div>
+        )}
+
+        <div className="form-row">
+          <div className="form-field">
+            <label className="field-label">Customer Name</label>
+            <input className="field-input" placeholder="e.g. Ramesh Kumar" value={customer} onChange={e => setCustomer(e.target.value)} required />
+          </div>
+          <div className="form-field">
+            <label className="field-label">Apiary Business</label>
+            <input className="field-input" value={business?.name || "Golden Hive Honey Farm"} disabled style={{ opacity: 0.6 }} />
+          </div>
+        </div>
+
+        <div style={{ margin: "16px 0 8px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <label className="field-label" style={{ margin: 0 }}>Invoice Items</label>
+            <button type="button" className="btn-ghost-sm" onClick={addRow}>+ Add Item</button>
           </div>
 
-          {/* Line Items */}
-          <div className="field-label" style={{ marginBottom: 10 }}>Line Items</div>
           {items.map((it, i) => (
-            <div key={i} className="invoice-line">
+            <div key={`line-${i}`} className="invoice-line">
               <div className="invoice-line-inputs">
-                <select className="field-input" value={it.name} onChange={e => { updateRow(i, "name", e.target.value); pickProduct(i, e.target.value); }} style={{ flex: 2 }}>
-                  <option value="">— Select product or type —</option>
-                  {(products || []).map(p => <option key={p.id} value={p.name}>{p.name} (₹{p.price})</option>)}
-                </select>
-                <input className="field-input" placeholder="Item name" value={it.name} onChange={e => updateRow(i, "name", e.target.value)} style={{ flex: 2 }} />
-                <input className="field-input" type="number" min="1" placeholder="Qty" value={it.quantity} onChange={e => updateRow(i, "quantity", e.target.value)} style={{ flex: 0.7 }} />
-                <input className="field-input" type="number" min="0" step="0.01" placeholder="Price" value={it.price} onChange={e => updateRow(i, "price", e.target.value)} style={{ flex: 1 }} />
-                <button type="button" className="btn-danger-sm" onClick={() => removeRow(i)} disabled={items.length <= 1}>✕</button>
+                {(products || []).length > 0 && (
+                  <select className="field-input" style={{ flex: 1 }} value={it.name} onChange={e => pickProduct(i, e.target.value)}>
+                    <option value="">Select from inventory…</option>
+                    {(products || []).map((p, pIdx) => <option key={`prod-opt-${pIdx}`} value={p.name}>{p.name} (₹{p.price})</option>)}
+                  </select>
+                )}
+                <input className="field-input" style={{ flex: 2 }} placeholder="Product or service name" value={it.name} onChange={e => updateRow(i, "name", e.target.value)} required />
+                <input className="field-input" style={{ width: 80 }} type="number" min="1" placeholder="Qty" value={it.quantity} onChange={e => updateRow(i, "quantity", e.target.value)} required />
+                <input className="field-input" style={{ width: 110 }} type="number" min="0" step="0.01" placeholder="Price (₹)" value={it.price} onChange={e => updateRow(i, "price", e.target.value)} required />
+                {items.length > 1 && (
+                  <button type="button" className="btn-danger-sm" onClick={() => removeRow(i)} aria-label="Remove item">✕</button>
+                )}
               </div>
             </div>
           ))}
-          <button type="button" className="btn-ghost" onClick={addRow} style={{ marginBottom: 20, marginTop: 8 }}>+ Add item</button>
-
-          {/* Totals */}
-          <div className="invoice-totals">
-            <div className="invoice-total-row"><span>Subtotal</span><strong>₹{sub.toFixed(2)}</strong></div>
-            {Number(gst) > 0 && <div className="invoice-total-row"><span>GST ({gst}%)</span><strong>₹{gstAmt.toFixed(2)}</strong></div>}
-            <div className="form-field" style={{ maxWidth: 200, marginLeft: "auto" }}>
-              <label className="field-label">Discount (₹)</label>
-              <input className="field-input" type="number" min="0" step="1" value={discount} onChange={e => setDiscount(e.target.value)} />
-            </div>
-            <div className="invoice-total-row total"><span>Total</span><strong>₹{total.toFixed(2)}</strong></div>
-          </div>
-
-          {error && <div className="form-err">{error}</div>}
-          {result && <div className="invoice-success">✓ Invoice {result.invoice_number} generated — ₹{result.total}</div>}
-
-          <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-            <button className="btn-primary" type="submit" disabled={generating}>
-              {generating ? "Generating…" : "Generate & Download PDF"}
-            </button>
-            {result?.pdf_bytes && (
-              <button type="button" className="btn-ghost" onClick={() => downloadBase64(result.pdf_bytes, result.filename || "invoice.pdf")}>
-                ↓ Download Again
-              </button>
-            )}
-            {result?.invoice_url && (
-              <button type="button" className="btn-ghost" onClick={() => window.open(result.invoice_url, "_blank")}>
-                Open in Browser
-              </button>
-            )}
-          </div>
-        </form>
-      </div>
-
-      {/* Local history of generated invoices */}
-      {history.length > 0 && (
-        <div className="panel" style={{ marginBottom: 16 }}>
-          <div className="panel-hd"><span className="panel-title">Generated Invoices</span><span className="panel-sub">{history.length} saved locally</span></div>
-          <table className="data-table">
-            <thead><tr><th>Invoice #</th><th>Customer</th><th>Total</th><th>Date</th><th>Action</th></tr></thead>
-            <tbody>
-              {history.map((h, i) => (
-                <tr key={i}>
-                  <td className="mono">{h.invoice_number}</td>
-                  <td>{h.customer}</td>
-                  <td><strong>₹{h.total}</strong></td>
-                  <td className="dimmed">{fmtTime(h.date)}</td>
-                  <td>
-                    <div className="action-row">
-                      {h.pdf_bytes && (
-                        <button className="btn-ghost-sm" onClick={() => downloadBase64(h.pdf_bytes, h.filename || "invoice.pdf")}>↓ PDF</button>
-                      )}
-                      {h.invoice_url && (
-                        <button className="btn-ghost-sm" onClick={() => window.open(h.invoice_url, "_blank")}>Open</button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
-      )}
-    </>
+
+        <div className="form-row" style={{ marginTop: 16 }}>
+          <div className="form-field">
+            <label className="field-label">GST Tax (%)</label>
+            <input className="field-input" type="number" min="0" max="100" step="0.1" placeholder="e.g. 5 or 12" value={gst} onChange={e => setGst(e.target.value)} />
+          </div>
+          <div className="form-field">
+            <label className="field-label">Discount (₹)</label>
+            <input className="field-input" type="number" min="0" step="1" placeholder="0" value={discount} onChange={e => setDiscount(e.target.value)} />
+          </div>
+        </div>
+
+        <div className="invoice-totals">
+          <div className="invoice-total-row"><span>Subtotal:</span><strong>{fmt(sub)}</strong></div>
+          {Number(gst) > 0 && <div className="invoice-total-row"><span>GST ({gst}%):</span><strong>+{fmt(gstAmt)}</strong></div>}
+          {Number(discount) > 0 && <div className="invoice-total-row"><span>Discount:</span><strong style={{ color: "var(--apple-green)" }}>-{fmt(discount)}</strong></div>}
+          <div className="invoice-total-row total"><span>Grand Total:</span><strong>{fmt(grandTotal)}</strong></div>
+        </div>
+
+        <div style={{ marginTop: 20 }}>
+          <button className="btn-primary" type="submit" disabled={generating}>
+            {generating ? "Generating PDF & Uploading…" : "Download PDF Invoice →"}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }
 

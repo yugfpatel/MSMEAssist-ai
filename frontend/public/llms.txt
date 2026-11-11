@@ -1,0 +1,35 @@
+# ApisAI: Smart Apiary & Blockchain Honey Traceability Platform
+> An end-to-end intelligent beekeeping and cryptographic supply chain ecosystem empowering apiary MSMEs, combatting honey adulteration, and verifying product authenticity.
+
+ApisAI unites real-time IoT colony telemetry, Google Gemini generative AI insights, immutable SHA-256 blockchain provenance, and automated WhatsApp conversational commerce into a unified platform.
+
+## Core Capabilities
+- **IoT Hive Monitoring**: Telemetry ingestion for hive internal temperature, relative humidity, colony weight gain/loss, and acoustic activity.
+- **AI Colony Health Diagnostics**: Gemini-powered anomaly detection for swarming prediction, brood diseases, queen failure, and feeding interventions.
+- **HoneyChain Cryptographic Traceability**: SHA-256 linked block records tracking each batch lifecycle (Harvested, Quality Tested, Packed, Labelled, Out for Sales, In Transit, Delivered).
+- **Public Verification Certificates**: Consumer-facing web verification certificates accessible via on-jar QR codes showing tamper-proof cryptographic timelines.
+- **Conversational Commerce**: WhatsApp AI assistant integration enabling direct-to-consumer automated order placement, customer inquiry handling, and status updates.
+- **Automated Financial Administration**: Dynamic PDF invoice generation with tax (GST) calculations, digital payment reconciliation, and inventory tracking.
+
+## Canonical URLs & Routes
+- Overview Dashboard: https://apis.ai/overview
+- Hive Monitoring & IoT: https://apis.ai/hives
+- Harvest Records: https://apis.ai/harvests
+- HoneyChain Traceability: https://apis.ai/traceability
+- Honey Inventory: https://apis.ai/inventory
+- Customer Orders: https://apis.ai/orders
+- Payment Reconciliations: https://apis.ai/payments
+- Automated PDF Invoicing: https://apis.ai/invoices
+- Public Verification: https://apis.ai/verify/batch/{batch_id}
+
+## Technology Architecture
+- **Frontend**: React 19, Vite 8, Apple Human Interface Design System, Hardware-accelerated CSS GPU transitions, Zero source-map production output.
+- **Backend**: FastAPI (Python 3), Uvicorn, ReportLab PDF rendering engine.
+- **Database & Storage**: Supabase (PostgreSQL with Row Level Security), Supabase Cloud Storage.
+- **AI & Integrations**: Google Gemini API, Zavu WhatsApp Cloud API, Razorpay payment gateway.
+- **Security**: Cryptographic SHA-256 block hashing, HTTPS, strict Content Security Policy, and sanitized JSON-LD schemas.
+
+## Contact & Organization
+- Platform: ApisAI by Team Comets
+- Domain: https://apis.ai
+- License: Proprietary / Enterprise MSME

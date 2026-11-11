@@ -1,0 +1,20 @@
+# Robots.txt for ApisAI Smart Apiary & Blockchain Traceability Platform
+# https://apis.ai
+
+User-agent: *
+Allow: /
+Allow: /overview
+Allow: /hives
+Allow: /harvests
+Allow: /traceability
+Allow: /inventory
+Allow: /orders
+Allow: /payments
+Allow: /invoices
+Allow: /verify/
+Allow: /llms.txt
+
+# Disallow authenticated backend API calls from search bot indexing
+Disallow: /api/
+
+Sitemap: https://apis.ai/sitemap.xml

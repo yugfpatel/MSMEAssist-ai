@@ -1,6 +1,16 @@
 import QRCode from "react-qr-code";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import API from "./api";
+
+function generateSensorReading() {
+  return {
+    temperature: +(34 + Math.random() * 5).toFixed(1),
+    humidity: +(50 + Math.random() * 20).toFixed(1),
+    weight: +(45 + Math.random() * 2).toFixed(1),
+    activity_level: "High",
+    battery_level: 95
+  };
+}
 
 const EVENT_TYPES = [
   { value: "Quality Tested",       label: "Quality Tested",         icon: "🧪", desc: "Lab or field quality check completed" },
@@ -31,7 +41,7 @@ export default function HoneyChain({ activeSection = "overview" }) {
   const [batches, setBatches]   = useState([]);
   const [insights, setInsights] = useState({});
   const [sensorData, setSensorData] = useState({});
-  const [loading, setLoading]   = useState(false);
+  const [loading, setLoading]   = useState(true);
   const [analyzing, setAnalyzing] = useState({});
 
   // Batch create form
@@ -58,7 +68,6 @@ export default function HoneyChain({ activeSection = "overview" }) {
   const [expandedBatch, setExpandedBatch] = useState(null);
 
   async function loadData() {
-    setLoading(true);
     try {
       const [hRes, harvRes, bRes] = await Promise.all([
         API.get("/api/honey/hives"),
@@ -68,11 +77,35 @@ export default function HoneyChain({ activeSection = "overview" }) {
       setHives(hRes.data.hives || []);
       setHarvests(harvRes.data.harvests || []);
       setBatches(bRes.data.batches || []);
-    } catch (e) { console.error(e); }
-    setLoading(false);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    let isSubscribed = true;
+    (async () => {
+      try {
+        const [hRes, harvRes, bRes] = await Promise.all([
+          API.get("/api/honey/hives"),
+          API.get("/api/honey/harvests"),
+          API.get("/api/honey/batches")
+        ]);
+        if (isSubscribed) {
+          setHives(hRes.data.hives || []);
+          setHarvests(harvRes.data.harvests || []);
+          setBatches(bRes.data.batches || []);
+          setLoading(false);
+        }
+      } catch (err) {
+        if (isSubscribed) {
+          console.error(err);
+          setLoading(false);
+        }
+      }
+    })();
+    return () => { isSubscribed = false; };
+  }, []);
 
   async function loadInsights(hiveId) {
     setAnalyzing(prev => ({ ...prev, [hiveId]: true }));
@@ -83,18 +116,13 @@ export default function HoneyChain({ activeSection = "overview" }) {
       ]);
       setInsights(prev  => ({ ...prev, [hiveId]: insRes.data.insight }));
       setSensorData(prev => ({ ...prev, [hiveId]: sensRes.data.readings }));
-    } catch (e) { console.error(e); }
+    } catch (err) { console.error(err); }
     setAnalyzing(prev => ({ ...prev, [hiveId]: false }));
   }
 
   async function demoIoT(hiveId) {
-    await API.post(`/api/honey/hives/${hiveId}/sensor-data`, {
-      temperature: 34 + Math.random() * 5,
-      humidity: 50 + Math.random() * 20,
-      weight: 45 + Math.random() * 2,
-      activity_level: "High",
-      battery_level: 95
-    });
+    const payload = generateSensorReading();
+    await API.post(`/api/honey/hives/${hiveId}/sensor-data`, payload);
     loadInsights(hiveId);
   }
 
@@ -104,7 +132,7 @@ export default function HoneyChain({ activeSection = "overview" }) {
     try {
       const res = await API.post("/api/honey/ai-generate-batch", { prompt });
       if (res.data.success && res.data.batch) setBatchForm(prev => ({ ...prev, ...res.data.batch }));
-    } catch (e) { alert("Failed to generate batch from AI."); }
+    } catch { alert("Failed to generate batch from AI."); }
     setIsGeneratingBatch(false);
   }
 
@@ -116,7 +144,7 @@ export default function HoneyChain({ activeSection = "overview" }) {
       setBatchForm({ batch_id: "", product_name: "", honey_variety: "", quantity: 0, harvest_date: "", packaging_date: "", quality_info: "" });
       setAiPrompt("");
       loadData();
-    } catch (e) { alert("Failed to save batch."); }
+    } catch { alert("Failed to save batch."); }
   }
 
   async function loadBatchTimeline(batchId) {

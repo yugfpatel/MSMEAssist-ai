@@ -1,11 +1,6 @@
 import QRCode from "react-qr-code";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import API from "./api";
-
-function fmt(v) {
-  if (!v) return "—";
-  return v;
-}
 
 function fmtDate(v) {
   if (!v) return "—";
@@ -49,13 +44,20 @@ export default function VerifyBatch({ batchId }) {
       }
     }
     load();
+
+    // Dynamic SEO update for public certificate page
+    document.title = `Batch ${batchId} Verification Certificate — ApisAI HoneyChain`;
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute("content", `Cryptographic provenance verification certificate for honey batch ${batchId}. Immutable SHA-256 blockchain audit trail and laboratory purity record.`);
+    const canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) canonical.setAttribute("href", `https://apis.ai/verify/batch/${batchId}`);
   }, [batchId]);
 
   if (loading) return (
     <div style={styles.screen}>
       <div style={styles.loadingBox}>
-        <div style={styles.spinner} />
-        <p style={{ color: "#888", marginTop: 16, fontSize: 14 }}>Verifying traceability chain…</p>
+        <div style={styles.spinner} role="status" aria-label="Loading verification data" />
+        <p style={{ color: "#86868b", marginTop: 16, fontSize: 14 }}>Verifying traceability chain…</p>
       </div>
     </div>
   );
@@ -64,7 +66,11 @@ export default function VerifyBatch({ batchId }) {
     <div style={styles.screen}>
       <div style={styles.errorBox}>
         <div style={{ fontSize: 32, marginBottom: 12 }}>✕</div>
-        <p style={{ color: "#f87171", fontWeight: 600 }}>{error || `Batch ${batchId} not found.`}</p>
+        <h1 style={{ color: "#ff453a", fontSize: 20, fontWeight: 600, marginBottom: 12 }}>Batch Verification Failed</h1>
+        <p style={{ color: "#86868b", marginBottom: 20 }}>{error || `Batch ${batchId} was not found on the HoneyChain ledger.`}</p>
+        <a href="/overview" style={{ display: "inline-block", padding: "8px 18px", borderRadius: 9999, background: "#ffffff", color: "#000000", fontWeight: 500, fontSize: 13, textDecoration: "none" }}>
+          Return to Dashboard →
+        </a>
       </div>
     </div>
   );
@@ -76,10 +82,18 @@ export default function VerifyBatch({ batchId }) {
     <div style={styles.screen}>
       <div style={styles.card}>
 
-        {/* ── Header ── */}
+        {/* ── Top Bar with back link ── */}
+        <div style={{ padding: "14px 24px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <a href="/overview" style={{ color: "#2997ff", fontSize: 12.5, fontWeight: 500, textDecoration: "none" }}>
+            ← ApisAI Platform
+          </a>
+          <span style={{ fontSize: 11, color: "#6e6e73", textTransform: "uppercase", letterSpacing: "0.1em" }}>Public Audit Record</span>
+        </div>
+
+        {/* ── Header with Single H1 ── */}
         <div style={styles.header}>
           <div style={styles.logo}>APIS AI</div>
-          <div style={styles.certLabel}>Certificate of Authenticity</div>
+          <h1 style={styles.certLabel}>Certificate of Authenticity</h1>
 
           <div style={verified ? styles.verifiedBadge : styles.failedBadge}>
             <span style={{ marginRight: 8 }}>{verified ? "✓" : "✕"}</span>
@@ -89,13 +103,15 @@ export default function VerifyBatch({ batchId }) {
 
         {/* ── QR ── */}
         <div style={styles.qrWrap}>
-          <QRCode
-            value={window.location.href}
-            size={100}
-            fgColor="#ffffff"
-            bgColor="#0a0a0a"
-          />
-          <p style={styles.qrLabel}>Scan to verify</p>
+          <div role="img" aria-label={`QR Code to publicly verify batch ${batchId} authenticity`}>
+            <QRCode
+              value={window.location.href}
+              size={110}
+              fgColor="#ffffff"
+              bgColor="#0a0a0a"
+            />
+          </div>
+          <p style={styles.qrLabel}>Scan to verify origin &amp; purity</p>
         </div>
 
         <div style={styles.divider} />
