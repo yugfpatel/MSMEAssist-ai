@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import API from "./api";
+import API, { startKeepAliveHeartbeat } from "./api";
 import HoneyChain from "./HoneyChain";
 import VerifyBatch from "./VerifyBatch";
 
@@ -543,12 +543,33 @@ function App() {
 
   useEffect(() => {
     let live = true;
+    const stopHeartbeat = startKeepAliveHeartbeat(4 * 60 * 1000);
+
     async function load() {
+      const wakeTimer = setTimeout(() => {
+        if (live) setStatus("Waking server…");
+      }, 2500);
+
       try {
-        await API.get("/", { timeout: 10000 });
+        let connected = false;
+        for (let attempt = 1; attempt <= 3 && !connected && live; attempt++) {
+          try {
+            await API.get("/health", { timeout: 35000 });
+            connected = true;
+          } catch (err) {
+            if (attempt < 3 && live) {
+              setStatus(`Waking server (${attempt}/3)…`);
+              await new Promise(r => setTimeout(r, 2500));
+            } else {
+              throw err;
+            }
+          }
+        }
+        clearTimeout(wakeTimer);
         if (!live) return;
         setStatus("Connected");
-        const safeGet = async (url, ms = 15000) => {
+
+        const safeGet = async (url, ms = 20000) => {
           try {
             const r = await API.get(url, { timeout: ms });
             return r.data;
@@ -574,11 +595,15 @@ function App() {
         setPayments(py?.payments || py || []);
         setInvoices(inv?.invoices || inv || []);
       } catch (e) {
+        clearTimeout(wakeTimer);
         if (live) setStatus(e.code === "ERR_NETWORK" ? "Network error" : `Error ${e.response?.status || ""}`);
       }
     }
     load();
-    return () => { live = false; };
+    return () => {
+      live = false;
+      stopHeartbeat();
+    };
   }, []);
 
   function login(e) {

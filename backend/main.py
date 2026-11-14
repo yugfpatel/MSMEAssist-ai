@@ -1,4 +1,6 @@
 import os
+import asyncio
+from contextlib import asynccontextmanager
 from payment_service import create_payment_link
 from zavu_service import send_whatsapp_message, send_invoice_and_payment
 from dotenv import load_dotenv
@@ -174,7 +176,23 @@ def update_order_as_paid(order_id: str, payment_id: str | None = None):
         return None
 
 
-app = FastAPI(title="ApisAI API")
+from keep_alive import start_self_pinger, get_keepalive_stats
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: spawn self-pinger background task to keep backend warm 24/7
+    pinger_task = asyncio.create_task(start_self_pinger(interval_seconds=540))
+    yield
+    # Shutdown: clean up background task
+    pinger_task.cancel()
+    try:
+        await pinger_task
+    except asyncio.CancelledError:
+        pass
+
+
+app = FastAPI(title="ApisAI API", lifespan=lifespan)
 
 try:
     supabase.storage.create_bucket("invoices", {"name": "invoices", "public": True})
@@ -275,8 +293,22 @@ def generate_invoice_endpoint(invoice: InvoiceRequest):
 @app.get("/")
 def home():
     return {
-        "message": "ApisAI API is running 🚀"
+        "message": "ApisAI API is running 🚀",
+        "service": "apisai-backend",
+        "status": "online",
     }
+
+
+@app.get("/health")
+def health_check():
+    """Health check and keepalive telemetry endpoint."""
+    return get_keepalive_stats()
+
+
+@app.get("/ping")
+def ping():
+    """Ultra-fast ping endpoint for external monitors."""
+    return {"status": "pong", "service": "apisai-backend"}
 
 
 @app.get("/test-db")

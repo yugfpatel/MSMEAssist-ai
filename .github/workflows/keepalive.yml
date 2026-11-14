@@ -1,0 +1,68 @@
+name: ApisAI Backend 24/7 Keep-Alive
+
+on:
+  schedule:
+    # Run every 10 minutes around the clock (Render free tier sleeps after 15 minutes of inactivity)
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+    inputs:
+      custom_url:
+        description: 'Optional custom URL to ping (overrides secrets.BACKEND_URL)'
+        required: false
+        default: ''
+
+concurrency:
+  group: keepalive-cron
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    name: Ping Backend Health Endpoint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve Target URL
+        id: resolve
+        run: |
+          TARGET="${{ github.event.inputs.custom_url }}"
+          if [ -z "$TARGET" ]; then
+            TARGET="${{ secrets.BACKEND_URL }}"
+          fi
+          if [ -z "$TARGET" ]; then
+            TARGET="${{ vars.BACKEND_URL }}"
+          fi
+          if [ -z "$TARGET" ]; then
+            TARGET="https://your-backend-domain.onrender.com"
+          fi
+          TARGET="${TARGET%/}"
+          echo "target_url=$TARGET" >> $GITHUB_OUTPUT
+          echo "Target Backend: $TARGET"
+
+      - name: Ping /health Endpoint
+        run: |
+          TARGET="${{ steps.resolve.outputs.target_url }}"
+          if [[ "$TARGET" == *"your-backend-domain"* ]]; then
+            echo "::warning ::BACKEND_URL secret or variable is not set yet in GitHub repository settings. Set secrets.BACKEND_URL to your deployed Render URL (e.g. https://apisai-backend.onrender.com)."
+            exit 0
+          fi
+
+          echo "Pinging ${TARGET}/health at $(date -u)..."
+          
+          # Retry up to 3 times with 5s delay in case server is just waking from cold start
+          HTTP_STATUS=$(curl -s -L -o /tmp/health_resp.json -w "%{http_code}" \
+            --connect-timeout 20 \
+            --max-time 60 \
+            --retry 3 \
+            --retry-delay 5 \
+            -H "User-Agent: GitHub-Actions-KeepAlive/1.0" \
+            "${TARGET}/health" || echo "FAILED")
+
+          echo "Response HTTP Status: $HTTP_STATUS"
+          if [ -f /tmp/health_resp.json ]; then
+            echo "Payload: $(cat /tmp/health_resp.json)"
+          fi
+
+          if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 400 ]; then
+            echo "SUCCESS: Backend is LIVE and healthy! 🚀"
+          else
+            echo "WARNING: Backend responded with status $HTTP_STATUS (may still be waking up)."
+          fi
